@@ -2,737 +2,888 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LinkBox">
 <title>LinkBox</title>
 <style>
-  :root {
-    --bg: #0f0f13;
-    --surface: #1a1a22;
-    --surface2: #22222e;
-    --border: #2e2e3e;
-    --accent: #7c6cfc;
-    --accent2: #fc6c8f;
-    --text: #f0f0f8;
-    --muted: #888899;
-    --radius: 14px;
-    --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
-    min-height: 100vh;
-    padding-bottom: 110px;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  /* HEADER */
-  .header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(15,15,19,0.93);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 16px 10px;
-  }
-  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .logo {
-    font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .header-actions { display: flex; gap: 8px; }
-  .icon-btn {
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    width: 36px; height: 36px; border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 16px; transition: background 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .icon-btn:active { background: var(--surface); }
+:root {
+  --black: #080808;
+  --white: #f5f5f5;
+  --gray1: #111111;
+  --gray2: #1c1c1c;
+  --gray3: #2a2a2a;
+  --gray4: #444;
+  --gray5: #888;
+  --accent: #e8ff47;
+  --accent-dim: rgba(232,255,71,0.12);
+  --radius: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 
-  /* TABS */
-  .tabs-wrap { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-  .tabs-wrap::-webkit-scrollbar { display: none; }
-  .tab {
-    flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    border: 1.5px solid var(--border); background: transparent; color: var(--muted);
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-    display: flex; align-items: center; gap: 4px;
-  }
-  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .tab:active { opacity: 0.7; }
-  .count-badge {
-    background: rgba(255,255,255,0.15); color: inherit;
-    font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
-  }
-  .tab:not(.active) .count-badge { background: var(--surface2); color: var(--muted); }
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--black);
+  color: var(--white);
+  font-family: -apple-system, 'SF Pro Display', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* SELECT MODE BANNER */
-  .select-banner {
-    display: none; position: sticky; top: 0; z-index: 99;
-    background: var(--accent); color: #fff;
-    padding: 10px 16px; align-items: center; justify-content: space-between;
-  }
-  .select-banner.visible { display: flex; }
-  .select-banner-left { font-size: 14px; font-weight: 700; }
-  .select-banner-actions { display: flex; gap: 8px; }
-  .sel-btn {
-    background: rgba(255,255,255,0.2); border: none; color: #fff;
-    padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;
-    cursor: pointer; -webkit-tap-highlight-color: transparent; font-family: inherit;
-  }
-  .sel-btn:active { opacity: 0.7; }
-  .sel-btn.danger { background: rgba(0,0,0,0.2); }
+/* ── APP SHELL ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  height: 100vh;
+}
 
-  /* CONTENT */
-  .content { padding: 16px; }
+/* ── HEADER ── */
+.header {
+  flex-shrink: 0;
+  padding: calc(var(--safe-top) + 14px) 20px 0;
+  position: relative;
+  z-index: 50;
+}
 
-  /* EMPTY */
-  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
-  .empty-desc { font-size: 13px; line-height: 1.6; }
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
 
-  /* CARDS */
-  .cards { display: flex; flex-direction: column; gap: 10px; }
-  .card {
-    background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: var(--radius); overflow: hidden; position: relative;
-    transition: transform 0.1s, border-color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none; -webkit-user-select: none;
-  }
-  .card.selected { border-color: var(--accent); background: #1e1b30; }
-  .card:active:not(.select-mode-active) { transform: scale(0.98); }
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--white);
+}
+.logo span { color: var(--accent); }
 
-  /* CHECKBOX OVERLAY */
-  .card-check {
-    display: none; position: absolute; top: 10px; left: 10px; z-index: 10;
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--surface2); border: 2px solid var(--border);
-    align-items: center; justify-content: center; font-size: 14px;
-    transition: all 0.15s;
-  }
-  .select-mode .card-check { display: flex; }
-  .card.selected .card-check { background: var(--accent); border-color: var(--accent); }
+.cat-manage-btn {
+  width: 34px; height: 34px;
+  background: var(--gray2);
+  border: none; border-radius: 10px;
+  color: var(--gray5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+}
+.cat-manage-btn:active { opacity: 0.6; }
 
-  .card-thumb {
-    width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;
-    background: var(--surface2);
-  }
-  .card-thumb-placeholder {
-    width: 100%; aspect-ratio: 16/9; background: var(--surface2);
-    display: flex; align-items: center; justify-content: center; font-size: 40px;
-  }
-  .card-body { padding: 10px 12px 10px; }
+/* ── CATEGORY INDICATOR ── */
+.cat-bar {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.cat-bar::-webkit-scrollbar { display: none; }
 
-  /* PLATFORM BADGE */
-  .platform-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-    padding: 2px 7px; border-radius: 6px; margin-bottom: 6px;
-  }
-  .badge-youtube  { background: rgba(255,68,68,0.15);  color: #ff6b6b; }
-  .badge-instagram{ background: rgba(225,48,108,0.15); color: #f06292; }
-  .badge-twitter  { background: rgba(29,155,240,0.15); color: #64b5f6; }
-  .badge-tiktok   { background: rgba(105,201,208,0.15);color: #69c9d0; }
-  .badge-other    { background: rgba(136,136,153,0.15);color: var(--muted); }
+.cat-pill {
+  flex-shrink: 0;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cat-pill.active {
+  background: var(--accent);
+  color: var(--black);
+}
+.cat-pill.inactive {
+  background: var(--gray2);
+  color: var(--gray5);
+}
+.cat-pill:active { opacity: 0.7; }
 
-  .card-title {
-    font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 6px;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .card-memo { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; font-style: italic; }
-  .card-meta { display: flex; align-items: center; justify-content: space-between; }
-  .card-date { font-size: 11px; color: var(--muted); }
-  .card-del-btn {
-    background: none; border: none; color: var(--muted);
-    font-size: 15px; cursor: pointer; padding: 4px 6px; border-radius: 6px;
-    -webkit-tap-highlight-color: transparent; position: relative; z-index: 5;
-  }
-  .card-del-btn:active { color: #ff6b6b; }
-  .card-link { position: absolute; inset: 0; z-index: 1; }
-  .card-bottom-row { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; }
+.cat-count {
+  font-size: 10px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  margin-left: 4px;
+  opacity: 0.6;
+}
 
-  /* FAB */
-  .fab {
-    position: fixed; bottom: 24px; right: 20px;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none; color: #fff; font-size: 28px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(124,108,252,0.5);
-    cursor: pointer; z-index: 200; -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s;
-  }
-  .fab:active { transform: scale(0.92); }
+/* ── SWIPE CONTAINER ── */
+.pages-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
 
-  /* MODAL */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7); z-index: 300; align-items: flex-end;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface); border-radius: 20px 20px 0 0;
-    width: 100%; padding: 20px 16px 44px;
-    border-top: 1px solid var(--border);
-    animation: slideUp 0.25s ease;
-    max-height: 90vh; overflow-y: auto;
-  }
-  @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+.pages-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
 
-  /* FORM */
-  .form-group { margin-bottom: 14px; }
-  .form-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.4px; }
-  .form-input {
-    width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
-    color: var(--text); padding: 12px 14px; border-radius: var(--radius-sm);
-    font-size: 15px; outline: none; transition: border-color 0.15s;
-    font-family: inherit; -webkit-appearance: none;
-  }
-  .form-input:focus { border-color: var(--accent); }
-  .form-input::placeholder { color: var(--muted); }
+.page {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 16px 80px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.page::-webkit-scrollbar { display: none; }
 
-  .fetch-preview {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-    padding: 10px; display: none; align-items: center; gap: 10px; margin-top: 8px;
-  }
-  .fetch-preview.visible { display: flex; }
-  .fetch-preview img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
-  .fetch-preview-info { flex: 1; overflow: hidden; }
-  .fetch-preview-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .fetch-preview-url { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ── EMPTY STATE ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60%;
+  gap: 10px;
+  color: var(--gray4);
+  text-align: center;
+}
+.empty-icon {
+  font-size: 44px;
+  margin-bottom: 4px;
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+.empty-title { font-size: 15px; font-weight: 700; color: var(--gray5); }
+.empty-hint { font-size: 12px; color: var(--gray4); line-height: 1.6; }
 
-  .chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip {
-    padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;
-    cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--muted);
-    -webkit-tap-highlight-color: transparent; transition: all 0.1s; font-family: inherit;
-  }
-  .chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .chip:active { opacity: 0.7; }
+/* ── CARDS ── */
+.cards { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
 
-  .btn {
-    width: 100%; padding: 14px; border-radius: var(--radius-sm);
-    font-size: 15px; font-weight: 700; border: none; cursor: pointer;
-    -webkit-tap-highlight-color: transparent; font-family: inherit; transition: opacity 0.15s;
-  }
-  .btn:active { opacity: 0.8; }
-  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); margin-top: 8px; }
-  .btn-danger { background: #3d1a1a; color: #ff6b6b; border: 1px solid #5c2a2a; margin-top: 8px; }
+.card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--gray1);
+  position: relative;
+  border: 1px solid var(--gray2);
+  transition: transform 0.12s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.card:active:not(.selecting) { transform: scale(0.97); }
+.card.selected { border-color: var(--accent); }
 
-  .loader { display: none; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); padding: 8px 0; }
-  .loader.visible { display: flex; }
-  .spin { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* thumb */
+.card-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--gray2);
+}
+.card-thumb {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.card-thumb-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  background: var(--gray2);
+}
+/* gradient overlay */
+.card-thumb-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(8,8,8,0.85) 100%);
+  pointer-events: none;
+}
+/* platform badge on thumb */
+.card-platform {
+  position: absolute;
+  bottom: 8px; left: 10px;
+  z-index: 2;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.p-youtube  { background: rgba(255,60,60,0.3);  color: #ff8080; border: 1px solid rgba(255,60,60,0.3); }
+.p-instagram{ background: rgba(225,48,108,0.25);color: #f48fb1; border: 1px solid rgba(225,48,108,0.3); }
+.p-twitter  { background: rgba(29,155,240,0.2); color: #90caf9; border: 1px solid rgba(29,155,240,0.3); }
+.p-tiktok   { background: rgba(105,201,208,0.2);color: #80deea; border: 1px solid rgba(105,201,208,0.3); }
+.p-other    { background: rgba(100,100,100,0.25);color: #aaa;   border: 1px solid rgba(100,100,100,0.3); }
 
-  /* CAT MANAGE */
-  .cat-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-  .cat-item {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 12px;
-  }
-  .cat-item-name { font-size: 14px; font-weight: 600; }
-  .cat-item-count { font-size: 12px; color: var(--muted); }
-  .cat-del { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; -webkit-tap-highlight-color: transparent; }
-  .cat-del:active { color: #ff6b6b; }
+/* card body */
+.card-body {
+  padding: 10px 12px 10px;
+}
+.card-title {
+  font-size: 14px; font-weight: 600;
+  line-height: 1.4; color: var(--white);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 8px;
+}
+.card-memo {
+  font-size: 12px; color: var(--gray5);
+  margin-bottom: 8px; font-style: italic; line-height: 1.5;
+}
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-date {
+  font-size: 10px; color: var(--gray4);
+  font-family: 'SF Mono', monospace;
+}
+.card-del {
+  background: none; border: none; color: var(--gray4);
+  font-size: 14px; cursor: pointer; padding: 4px 6px;
+  border-radius: 6px; position: relative; z-index: 5;
+}
+.card-del:active { color: #ff5555; }
 
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 90px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600;
-    opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; z-index: 999;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* select checkbox */
+.card-check {
+  display: none;
+  position: absolute; top: 10px; right: 10px; z-index: 10;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(8,8,8,0.5);
+  border: 2px solid rgba(255,255,255,0.3);
+  align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--black);
+  backdrop-filter: blur(4px);
+}
+.select-mode .card-check { display: flex; }
+.card.selected .card-check { background: var(--accent); border-color: var(--accent); }
+.card-link { position: absolute; inset: 0; z-index: 1; }
+.card-footer { position: relative; z-index: 5; }
 
-  /* MOVE MODAL target chips */
-  .move-target-chip {
-    padding: 10px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
-    cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text);
-    width: 100%; text-align: left; font-family: inherit;
-    -webkit-tap-highlight-color: transparent; transition: all 0.1s;
-  }
-  .move-target-chip:active { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* ── SELECT BANNER ── */
+.select-banner {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 200;
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
+  background: rgba(8,8,8,0.95);
+  border-bottom: 1px solid var(--gray3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.select-banner.visible { display: flex; }
+.sel-count { font-size: 14px; font-weight: 700; }
+.sel-actions { display: flex; gap: 8px; }
+.sel-btn {
+  padding: 7px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 700;
+  border: none; cursor: pointer; font-family: inherit;
+}
+.sel-btn.move { background: var(--accent); color: var(--black); }
+.sel-btn.del  { background: var(--gray3); color: #ff6b6b; }
+.sel-btn.cancel { background: var(--gray2); color: var(--gray5); }
+.sel-btn:active { opacity: 0.7; }
+
+/* ── FAB ── */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--safe-bottom) + 24px);
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none; color: var(--black);
+  font-size: 26px; font-weight: 300;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 24px rgba(232,255,71,0.35);
+  cursor: pointer; z-index: 100;
+  transition: transform 0.15s;
+}
+.fab:active { transform: scale(0.9); }
+
+/* ── MODAL ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 300;
+  align-items: flex-end;
+}
+.overlay.open { display: flex; }
+.sheet {
+  background: var(--gray1);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  padding: 20px 20px calc(var(--safe-bottom) + 32px);
+  border-top: 1px solid var(--gray3);
+  animation: up 0.28s cubic-bezier(0.4,0,0.2,1);
+  max-height: 88vh; overflow-y: auto;
+}
+@keyframes up { from { transform: translateY(40px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+.sheet-handle { width: 32px; height: 4px; background: var(--gray3); border-radius: 2px; margin: 0 auto 18px; }
+.sheet-title { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 18px; }
+
+/* FORM */
+.field { margin-bottom: 14px; }
+.label {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--gray5); margin-bottom: 8px; display: block;
+}
+.input {
+  width: 100%; background: var(--gray2); border: 1.5px solid var(--gray3);
+  color: var(--white); padding: 13px 14px; border-radius: 12px;
+  font-size: 15px; outline: none; font-family: inherit;
+  -webkit-appearance: none; transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--gray4); }
+
+.preview-box {
+  display: none; background: var(--gray2); border: 1px solid var(--gray3);
+  border-radius: 12px; padding: 10px; align-items: center; gap: 10px; margin-top: 8px;
+}
+.preview-box.on { display: flex; }
+.preview-box img { width: 56px; height: 38px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+.preview-info { flex: 1; overflow: hidden; }
+.preview-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview-host  { font-size: 11px; color: var(--gray5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 7px 13px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid var(--gray3); background: transparent; color: var(--gray5);
+  font-family: inherit; transition: all 0.12s;
+}
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--black); }
+.chip:active { opacity: 0.7; }
+
+.btn {
+  width: 100%; padding: 15px; border-radius: 14px;
+  font-size: 15px; font-weight: 800; border: none; cursor: pointer;
+  font-family: inherit; letter-spacing: -0.3px;
+  transition: opacity 0.15s;
+}
+.btn:active { opacity: 0.75; }
+.btn-accent { background: var(--accent); color: var(--black); }
+.btn-ghost  { background: var(--gray2); color: var(--white); border: 1px solid var(--gray3); margin-top: 8px; }
+.btn-red    { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.2); margin-top: 8px; }
+
+.loader { display: none; align-items: center; gap: 8px; font-size: 12px; color: var(--gray5); padding: 8px 0; }
+.loader.on { display: flex; }
+.spin { width: 14px; height: 14px; border: 2px solid var(--gray3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* CAT LIST in manage sheet */
+.cat-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--gray2); border: 1px solid var(--gray3);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+}
+.cat-row-name { font-size: 14px; font-weight: 700; }
+.cat-row-count { font-size: 11px; color: var(--gray5); font-family: monospace; margin-left: 6px; }
+.cat-row-del { background: none; border: none; color: var(--gray4); font-size: 16px; cursor: pointer; padding: 4px; }
+.cat-row-del:active { color: #ff5555; }
+
+/* MOVE SHEET */
+.move-btn {
+  width: 100%; padding: 14px 16px; border-radius: 12px;
+  background: var(--gray2); border: 1px solid var(--gray3);
+  color: var(--white); font-size: 14px; font-weight: 700;
+  font-family: inherit; cursor: pointer; text-align: left; margin-bottom: 8px;
+  transition: background 0.1s;
+}
+.move-btn:active { background: var(--accent); color: var(--black); border-color: var(--accent); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: calc(var(--safe-bottom) + 88px); left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--gray2); border: 1px solid var(--gray3);
+  color: var(--white); padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 700; opacity: 0;
+  transition: all 0.22s; pointer-events: none; white-space: nowrap; z-index: 999;
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-top">
-    <div class="logo">LinkBox</div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="openCatModal()">🗂️</button>
+<div id="app">
+  <div class="header">
+    <div class="header-row">
+      <div class="logo">link<span>.</span></div>
+      <button class="cat-manage-btn" onclick="openSheet('catSheet')">⊞</button>
     </div>
+    <div class="cat-bar" id="catBar"></div>
   </div>
-  <div class="tabs-wrap" id="tabsWrap"></div>
-</div>
-
-<!-- SELECT MODE BANNER -->
-<div class="select-banner" id="selectBanner">
-  <div class="select-banner-left" id="selectCount">0개 선택</div>
-  <div class="select-banner-actions">
-    <button class="sel-btn" onclick="openMoveModal()">📂 이동</button>
-    <button class="sel-btn danger" onclick="deleteSelected()">🗑️ 삭제</button>
-    <button class="sel-btn" onclick="exitSelectMode()">취소</button>
+  <div class="pages-wrapper" id="pagesWrapper">
+    <div class="pages-track" id="pagesTrack"></div>
   </div>
 </div>
 
-<div class="content" id="content"></div>
+<!-- SELECT BANNER -->
+<div class="select-banner" id="selBanner">
+  <div class="sel-count" id="selCount">0개 선택</div>
+  <div class="sel-actions">
+    <button class="sel-btn move" onclick="openMoveSheet()">이동</button>
+    <button class="sel-btn del"  onclick="askDeleteSel()">삭제</button>
+    <button class="sel-btn cancel" onclick="exitSel()">취소</button>
+  </div>
+</div>
 
-<button class="fab" id="fab" onclick="openAddModal()">＋</button>
+<button class="fab" id="fab" onclick="openAdd()">＋</button>
 
-<!-- ADD MODAL -->
-<div class="modal-overlay" id="addModal" onclick="closeOutside(event,'addModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">링크 추가</div>
-    <div class="form-group">
-      <label class="form-label">URL</label>
-      <input class="form-input" id="urlInput" type="url" placeholder="https://..." oninput="onUrlInput()"
+<!-- ADD SHEET -->
+<div class="overlay" id="addSheet" onclick="bgClose(event,'addSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">새 링크</div>
+    <div class="field">
+      <label class="label">URL</label>
+      <input class="input" id="urlIn" type="url" placeholder="https://..." oninput="onUrl()"
         autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      <div class="loader" id="fetchLoader"><div class="spin"></div> 정보 불러오는 중...</div>
-      <div class="fetch-preview" id="fetchPreview">
-        <img id="previewThumb" src="" alt="">
-        <div class="fetch-preview-info">
-          <div class="fetch-preview-title" id="previewTitle"></div>
-          <div class="fetch-preview-url" id="previewUrl"></div>
+      <div class="loader" id="loadingIndicator"><div class="spin"></div>불러오는 중...</div>
+      <div class="preview-box" id="previewBox">
+        <img id="prevImg" src="" alt="">
+        <div class="preview-info">
+          <div class="preview-title" id="prevTitle"></div>
+          <div class="preview-host"  id="prevHost"></div>
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">메모 (선택)</label>
-      <input class="form-input" id="memoInput" type="text" placeholder="나중에 뭔지 알 수 있게...">
+    <div class="field">
+      <label class="label">메모 (선택)</label>
+      <input class="input" id="memoIn" type="text" placeholder="나중에 뭔지 알 수 있게...">
     </div>
-    <div class="form-group">
-      <label class="form-label">카테고리</label>
-      <div class="chip-grid" id="catSelectGrid"></div>
+    <div class="field">
+      <label class="label">카테고리</label>
+      <div class="chip-row" id="catChips"></div>
     </div>
-    <button class="btn btn-primary" onclick="saveLink()">저장하기</button>
-    <button class="btn btn-ghost" onclick="closeModal('addModal')">취소</button>
+    <button class="btn btn-accent" onclick="doSave()">저장</button>
+    <button class="btn btn-ghost" onclick="closeSheet('addSheet')">취소</button>
   </div>
 </div>
 
-<!-- CAT MANAGE MODAL -->
-<div class="modal-overlay" id="catModal" onclick="closeOutside(event,'catModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">카테고리 관리</div>
-    <div class="cat-list" id="catList"></div>
-    <div class="form-group" style="display:flex;gap:8px;">
-      <input class="form-input" id="newCatInput" type="text" placeholder="새 카테고리 이름" style="flex:1" maxlength="20">
-      <button class="btn btn-primary" style="width:auto;padding:12px 18px" onclick="addCategory()">추가</button>
+<!-- CAT MANAGE SHEET -->
+<div class="overlay" id="catSheet" onclick="bgClose(event,'catSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">카테고리</div>
+    <div id="catManageList"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <input class="input" id="newCatIn" type="text" placeholder="새 카테고리 이름" style="flex:1" maxlength="20">
+      <button class="btn btn-accent" style="width:auto;padding:13px 18px" onclick="addCat()">추가</button>
     </div>
-    <button class="btn btn-ghost" onclick="closeModal('catModal')">닫기</button>
+    <button class="btn btn-ghost" onclick="closeSheet('catSheet')">닫기</button>
   </div>
 </div>
 
-<!-- MOVE MODAL -->
-<div class="modal-overlay" id="moveModal" onclick="closeOutside(event,'moveModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="moveModalTitle">카테고리 이동</div>
-    <div class="cat-list" id="moveTargetList"></div>
-    <button class="btn btn-ghost" onclick="closeModal('moveModal')">취소</button>
+<!-- MOVE SHEET -->
+<div class="overlay" id="moveSheet" onclick="bgClose(event,'moveSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="moveTitleEl">카테고리 이동</div>
+    <div id="moveTargets"></div>
+    <button class="btn btn-ghost" onclick="closeSheet('moveSheet')">취소</button>
   </div>
 </div>
 
-<!-- DELETE CONFIRM -->
-<div class="modal-overlay" id="deleteModal" onclick="closeOutside(event,'deleteModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">링크 삭제</div>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:16px;" id="deleteDesc">삭제할까요?</p>
-    <button class="btn btn-danger" onclick="confirmDelete()">삭제하기</button>
-    <button class="btn btn-ghost" onclick="closeModal('deleteModal')">취소</button>
+<!-- DELETE CONFIRM SHEET -->
+<div class="overlay" id="delSheet" onclick="bgClose(event,'delSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">삭제할까요?</div>
+    <p style="font-size:14px;color:#888;margin-bottom:20px;" id="delDesc"></p>
+    <button class="btn btn-red" onclick="doDelete()">삭제</button>
+    <button class="btn btn-ghost" onclick="closeSheet('delSheet')">취소</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'linkbox_v3';
-
-let state = {
-  categories: ['전체','🍳 요리/맛집','💪 운동/건강','🎵 음악','🤖 AI','📰 뉴스/정보','🛍️ 쇼핑','😂 재미/유머'],
+// ── STATE ──────────────────────────────────────────────
+const KEY = 'linkbox_v4';
+let S = {
+  cats: ['🍳 요리/맛집','💪 운동/건강','🎵 음악','🤖 AI','📰 뉴스/정보','🛍️ 쇼핑','😂 재미/유머'],
   links: [],
-  activeTab: '전체'
+  page: 0
 };
 
-let selectMode = false;
-let selectedIds = new Set();
-let pendingLink = null;
-let fetchTimer = null;
-let deleteSingleId = null;
-
-// ── STORAGE ──────────────────────────────────────────
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state = parsed;
-      if (!state.categories.includes('전체')) state.categories.unshift('전체');
-    }
-  } catch(e) {}
+function loadS() {
+  try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch(e) {}
 }
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function saveS() { localStorage.setItem(KEY, JSON.stringify(S)); }
 
-// ── PLATFORM ─────────────────────────────────────────
-function detectPlatform(url) {
+// ── PLATFORM ──────────────────────────────────────────
+function plat(url) {
   if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
   if (/instagram\.com/.test(url)) return 'instagram';
   if (/twitter\.com|x\.com/.test(url)) return 'twitter';
   if (/tiktok\.com/.test(url)) return 'tiktok';
   return 'other';
 }
-const PLATFORM_LABEL = { youtube:'YouTube', instagram:'Instagram', twitter:'X', tiktok:'TikTok', other:'링크' };
-const PLATFORM_EMOJI = { youtube:'▶️', instagram:'📷', twitter:'🐦', tiktok:'🎵', other:'🔗' };
+const PLABEL = {youtube:'YouTube',instagram:'Instagram',twitter:'X',tiktok:'TikTok',other:'링크'};
+const PEMOJI = {youtube:'▶',instagram:'◈',twitter:'✕',tiktok:'♪',other:'⊙'};
 
-// ── FETCH ─────────────────────────────────────────────
-let fetchDebounce = null;
-function onUrlInput() {
-  clearTimeout(fetchDebounce);
-  const url = document.getElementById('urlInput').value.trim();
-  document.getElementById('fetchPreview').classList.remove('visible');
-  pendingLink = null;
+// ── FETCH PREVIEW ─────────────────────────────────────
+let fetchT = null, pending = null;
+function onUrl() {
+  clearTimeout(fetchT);
+  const url = document.getElementById('urlIn').value.trim();
+  document.getElementById('previewBox').classList.remove('on');
+  pending = null;
   if (!url) return;
-  fetchDebounce = setTimeout(() => doFetch(url), 700);
+  fetchT = setTimeout(() => doFetch(url), 650);
 }
-
 async function doFetch(url) {
-  const platform = detectPlatform(url);
-  const loader = document.getElementById('fetchLoader');
-  if (platform === 'youtube') {
-    loader.classList.add('visible');
+  const p = plat(url);
+  const loader = document.getElementById('loadingIndicator');
+  pending = { url, title:'', thumb:'', platform: p };
+  if (p === 'youtube') {
+    loader.classList.add('on');
     try {
       const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
       if (r.ok) {
         const d = await r.json();
-        pendingLink = { url, title: d.title, thumb: d.thumbnail_url, platform };
+        pending = { url, title: d.title, thumb: d.thumbnail_url, platform: p };
         showPreview(d.thumbnail_url, d.title, url);
-      } else throw new Error();
-    } catch {
-      pendingLink = { url, title: '', thumb: '', platform };
-      showPreview('', 'YouTube 링크', url);
-    }
-    loader.classList.remove('visible');
+      } else showPreview('', 'YouTube', url);
+    } catch { showPreview('', 'YouTube', url); }
+    loader.classList.remove('on');
   } else {
-    pendingLink = { url, title: '', thumb: '', platform };
-    showPreview('', PLATFORM_LABEL[platform] + ' 링크', url);
+    let host = '';
+    try { host = new URL(url).hostname.replace('www.',''); } catch(e) {}
+    showPreview('', PLABEL[p], host || url);
   }
 }
-
-function showPreview(thumb, title, url) {
-  const img = document.getElementById('previewThumb');
-  document.getElementById('previewTitle').textContent = title;
-  document.getElementById('previewUrl').textContent = url;
+function showPreview(thumb, title, host) {
+  const img = document.getElementById('prevImg');
   img.style.display = thumb ? 'block' : 'none';
   if (thumb) img.src = thumb;
-  document.getElementById('fetchPreview').classList.add('visible');
+  document.getElementById('prevTitle').textContent = title;
+  document.getElementById('prevHost').textContent = host;
+  document.getElementById('previewBox').classList.add('on');
 }
 
-// ── SAVE LINK ─────────────────────────────────────────
-function saveLink() {
-  const url = document.getElementById('urlInput').value.trim();
-  if (!url) { showToast('URL을 입력해주세요'); return; }
-  const memo = document.getElementById('memoInput').value.trim();
-  const selChip = document.querySelector('#catSelectGrid .chip.selected');
-  const category = selChip ? selChip.dataset.cat : (state.categories.find(c=>c!=='전체') || '기타');
-  const base = pendingLink || { url, title: '', thumb: '', platform: detectPlatform(url) };
-  const link = { ...base, memo, category, id: Date.now().toString(), date: fmtDate(new Date()) };
-  state.links.unshift(link);
-  saveState();
+// ── SAVE ──────────────────────────────────────────────
+function doSave() {
+  const url = document.getElementById('urlIn').value.trim();
+  if (!url) { toast('URL을 입력해주세요'); return; }
+  const memo = document.getElementById('memoIn').value.trim();
+  const chip = document.querySelector('#catChips .chip.on');
+  const cat = chip ? chip.dataset.c : S.cats[0];
+  const base = pending || { url, title:'', thumb:'', platform: plat(url) };
+  const link = { ...base, memo, cat, id: Date.now().toString(), date: fmtDate(new Date()) };
+  S.links.unshift(link);
+  saveS();
   render();
-  closeModal('addModal');
-  showToast('저장됐어요 ✓');
+  closeSheet('addSheet');
+  toast('저장됐어요');
 }
-
-function fmtDate(d) { return d.toLocaleDateString('ko-KR', {month:'short',day:'numeric'}); }
+function fmtDate(d) { return d.toLocaleDateString('ko-KR',{month:'short',day:'numeric'}); }
 
 // ── SELECT MODE ───────────────────────────────────────
-function enterSelectMode(id) {
-  selectMode = true;
-  selectedIds = new Set([id]);
-  document.getElementById('content').classList.add('select-mode');
+let selMode = false, selIds = new Set(), delSingleId = null;
+
+function enterSel(id) {
+  selMode = true;
+  selIds = new Set([id]);
   document.getElementById('fab').style.display = 'none';
-  updateSelectBanner();
-  renderCards();
+  updateSelBanner();
+  rerenderCards();
 }
-
-function exitSelectMode() {
-  selectMode = false;
-  selectedIds.clear();
-  document.getElementById('content').classList.remove('select-mode');
+function exitSel() {
+  selMode = false; selIds.clear();
   document.getElementById('fab').style.display = 'flex';
-  document.getElementById('selectBanner').classList.remove('visible');
-  renderCards();
+  document.getElementById('selBanner').classList.remove('visible');
+  rerenderCards();
 }
-
-function toggleSelect(id) {
-  if (selectedIds.has(id)) selectedIds.delete(id);
-  else selectedIds.add(id);
-  if (selectedIds.size === 0) { exitSelectMode(); return; }
-  updateSelectBanner();
-  // just update the card visuals
+function toggleSel(id) {
+  if (selIds.has(id)) selIds.delete(id); else selIds.add(id);
+  if (selIds.size === 0) { exitSel(); return; }
+  updateSelBanner();
   document.querySelectorAll('.card').forEach(c => {
-    const cid = c.dataset.id;
-    c.classList.toggle('selected', selectedIds.has(cid));
+    const sel = selIds.has(c.dataset.id);
+    c.classList.toggle('selected', sel);
     const chk = c.querySelector('.card-check');
-    if (chk) chk.textContent = selectedIds.has(cid) ? '✓' : '';
+    if (chk) chk.textContent = sel ? '✓' : '';
   });
 }
-
-function updateSelectBanner() {
-  document.getElementById('selectBanner').classList.add('visible');
-  document.getElementById('selectCount').textContent = `${selectedIds.size}개 선택됨`;
+function updateSelBanner() {
+  document.getElementById('selBanner').classList.add('visible');
+  document.getElementById('selCount').textContent = `${selIds.size}개 선택`;
 }
 
-// ── MOVE ─────────────────────────────────────────────
-function openMoveModal() {
-  if (selectedIds.size === 0) return;
-  const currentCats = [...new Set([...selectedIds].map(id => state.links.find(l=>l.id===id)?.category))];
-  const targets = state.categories.filter(c => c !== '전체' && !currentCats.includes(c));
-  const list = document.getElementById('moveTargetList');
-  document.getElementById('moveModalTitle').textContent = `${selectedIds.size}개 링크 이동`;
-  if (targets.length === 0) {
-    list.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:10px 0;">이동할 수 있는 다른 카테고리가 없어요</p>';
-  } else {
-    list.innerHTML = targets.map(cat =>
-      `<button class="move-target-chip" onclick="moveSelected('${esc(cat)}')">${cat}</button>`
-    ).join('');
-  }
-  openModal('moveModal');
+// ── MOVE ──────────────────────────────────────────────
+function openMoveSheet() {
+  const curCats = [...new Set([...selIds].map(id => S.links.find(l=>l.id===id)?.cat).filter(Boolean))];
+  const targets = S.cats.filter(c => !curCats.includes(c));
+  document.getElementById('moveTitleEl').textContent = `${selIds.size}개 링크 이동`;
+  const el = document.getElementById('moveTargets');
+  el.innerHTML = targets.length === 0
+    ? '<p style="color:#666;font-size:13px;text-align:center;padding:12px 0">이동 가능한 카테고리가 없어요</p>'
+    : targets.map(c => `<button class="move-btn" onclick="doMove('${esc(c)}')">${c}</button>`).join('');
+  openSheet('moveSheet');
 }
-
-function moveSelected(cat) {
-  state.links = state.links.map(l => selectedIds.has(l.id) ? {...l, category: cat} : l);
-  saveState();
-  closeModal('moveModal');
-  exitSelectMode();
-  showToast(`'${cat}'(으)로 이동했어요`);
+function doMove(cat) {
+  S.links = S.links.map(l => selIds.has(l.id) ? {...l, cat} : l);
+  saveS(); closeSheet('moveSheet'); exitSel();
+  toast(`'${cat}'으로 이동했어요`);
 }
 
 // ── DELETE ────────────────────────────────────────────
-function openDeleteSingle(id) {
-  deleteSingleId = id;
-  document.getElementById('deleteDesc').textContent = '이 링크를 삭제할까요? 되돌릴 수 없어요.';
-  openModal('deleteModal');
+function askDeleteSingle(id) {
+  delSingleId = id;
+  document.getElementById('delDesc').textContent = '이 링크를 삭제할까요? 되돌릴 수 없어요.';
+  openSheet('delSheet');
 }
-
-function deleteSelected() {
-  const n = selectedIds.size;
-  document.getElementById('deleteDesc').textContent = `선택한 ${n}개 링크를 모두 삭제할까요?`;
-  deleteSingleId = null;
-  openModal('deleteModal');
+function askDeleteSel() {
+  delSingleId = null;
+  document.getElementById('delDesc').textContent = `선택한 ${selIds.size}개 링크를 모두 삭제할까요?`;
+  openSheet('delSheet');
 }
-
-function confirmDelete() {
-  if (deleteSingleId) {
-    state.links = state.links.filter(l => l.id !== deleteSingleId);
-    deleteSingleId = null;
+function doDelete() {
+  if (delSingleId) {
+    S.links = S.links.filter(l => l.id !== delSingleId);
+    delSingleId = null;
   } else {
-    state.links = state.links.filter(l => !selectedIds.has(l.id));
-    exitSelectMode();
+    S.links = S.links.filter(l => !selIds.has(l.id));
+    exitSel();
   }
-  saveState(); render();
-  closeModal('deleteModal');
-  showToast('삭제했어요');
+  saveS(); render(); closeSheet('delSheet'); toast('삭제했어요');
 }
 
 // ── CATEGORIES ────────────────────────────────────────
-function addCategory() {
-  const val = document.getElementById('newCatInput').value.trim();
-  if (!val) return;
-  if (state.categories.includes(val)) { showToast('이미 있어요'); return; }
-  state.categories.push(val);
-  saveState(); renderCatModal(); renderTabs(); renderCatSelectGrid();
-  document.getElementById('newCatInput').value = '';
+function addCat() {
+  const v = document.getElementById('newCatIn').value.trim();
+  if (!v) return;
+  if (S.cats.includes(v)) { toast('이미 있는 카테고리예요'); return; }
+  S.cats.push(v);
+  saveS(); renderCatManage(); render();
+  document.getElementById('newCatIn').value = '';
 }
-
-function deleteCategory(cat) {
-  if (cat === '전체') return;
-  const n = state.links.filter(l=>l.category===cat).length;
-  if (n > 0 && !confirm(`'${cat}' 카테고리의 링크 ${n}개도 함께 삭제됩니다.`)) return;
-  state.categories = state.categories.filter(c=>c!==cat);
-  state.links = state.links.filter(l=>l.category!==cat);
-  if (state.activeTab === cat) state.activeTab = '전체';
-  saveState(); renderCatModal(); render();
+function delCat(cat) {
+  const n = S.links.filter(l=>l.cat===cat).length;
+  if (n > 0 && !confirm(`'${cat}' 카테고리의 링크 ${n}개도 삭제됩니다.`)) return;
+  S.cats = S.cats.filter(c=>c!==cat);
+  S.links = S.links.filter(l=>l.cat!==cat);
+  if (S.page >= S.cats.length) S.page = Math.max(0, S.cats.length - 1);
+  saveS(); renderCatManage(); render();
 }
-
-// ── MODALS ────────────────────────────────────────────
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
-  if (id === 'addModal') {
-    document.getElementById('urlInput').value = '';
-    document.getElementById('memoInput').value = '';
-    document.getElementById('fetchPreview').classList.remove('visible');
-    pendingLink = null;
-  }
-}
-function closeOutside(e, id) { if (e.target.id === id) closeModal(id); }
-
-function openAddModal() {
-  renderCatSelectGrid();
-  openModal('addModal');
-  setTimeout(() => document.getElementById('urlInput').focus(), 300);
-}
-function openCatModal() { renderCatModal(); openModal('catModal'); }
-
-// ── RENDER ────────────────────────────────────────────
-function setTab(cat) { state.activeTab = cat; if (selectMode) exitSelectMode(); else render(); }
-
-function renderTabs() {
-  document.getElementById('tabsWrap').innerHTML = state.categories.map(cat => {
-    const n = cat === '전체' ? state.links.length : state.links.filter(l=>l.category===cat).length;
-    return `<button class="tab ${state.activeTab===cat?'active':''}" onclick="setTab('${esc(cat)}')">
-      ${cat}${n>0?`<span class="count-badge">${n}</span>`:''}
-    </button>`;
+function renderCatManage() {
+  document.getElementById('catManageList').innerHTML = S.cats.map(cat => {
+    const n = S.links.filter(l=>l.cat===cat).length;
+    return `<div class="cat-row">
+      <span class="cat-row-name">${cat}<span class="cat-row-count">${n}</span></span>
+      <button class="cat-row-del" onclick="delCat('${esc(cat)}')">✕</button>
+    </div>`;
   }).join('');
 }
 
-function renderCatSelectGrid() {
-  const cats = state.categories.filter(c=>c!=='전체');
-  document.getElementById('catSelectGrid').innerHTML = cats.map((c,i) =>
-    `<button class="chip ${i===0?'selected':''}" data-cat="${esc(c)}" onclick="selectChip(this)">${c}</button>`
+// ── SWIPE ─────────────────────────────────────────────
+let tsX = 0, tsY = 0, dragging = false, dragDx = 0;
+const wrapper = () => document.getElementById('pagesWrapper');
+const track   = () => document.getElementById('pagesTrack');
+
+function trackX() { return -S.page * wrapper().offsetWidth; }
+function setTrack(x, animate) {
+  const t = track();
+  t.style.transition = animate ? 'transform 0.32s cubic-bezier(0.4,0,0.2,1)' : 'none';
+  t.style.transform = `translateX(${x}px)`;
+}
+
+document.addEventListener('touchstart', e => {
+  if (e.target.closest('.overlay') || e.target.closest('.select-banner') || e.target.closest('.fab')) return;
+  const card = e.target.closest('.card');
+  if (card) {
+    pressId = card.dataset.id;
+    pressTimer = setTimeout(() => {
+      if (!selMode) enterSel(pressId);
+      else toggleSel(pressId);
+      pressTimer = null;
+    }, 480);
+  }
+  tsX = e.touches[0].clientX;
+  tsY = e.touches[0].clientY;
+  dragging = false; dragDx = 0;
+}, {passive:true});
+
+document.addEventListener('touchmove', e => {
+  if (selMode) return;
+  clearTimeout(pressTimer); pressTimer = null;
+  const dx = e.touches[0].clientX - tsX;
+  const dy = e.touches[0].clientY - tsY;
+  if (!dragging && Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
+  if (!dragging && Math.abs(dx) > 6) { dragging = true; }
+  if (dragging) {
+    // Check if current page scroll position allows horizontal swipe
+    const page = document.querySelectorAll('.page')[S.page];
+    if (!page) return;
+    dragDx = dx;
+    setTrack(trackX() + dx * 0.6, false);
+  }
+}, {passive:true});
+
+document.addEventListener('touchend', e => {
+  clearTimeout(pressTimer); pressTimer = null;
+  if (!dragging) return;
+  dragging = false;
+  const threshold = wrapper().offsetWidth * 0.25;
+  if (dragDx < -threshold && S.page < S.cats.length - 1) S.page++;
+  else if (dragDx > threshold && S.page > 0) S.page--;
+  setTrack(trackX(), true);
+  renderCatBar();
+}, {passive:true});
+
+// ── LONG PRESS ────────────────────────────────────────
+let pressTimer = null, pressId = null;
+
+// ── SHEETS ────────────────────────────────────────────
+function openSheet(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+  if (id === 'addSheet') {
+    document.getElementById('urlIn').value = '';
+    document.getElementById('memoIn').value = '';
+    document.getElementById('previewBox').classList.remove('on');
+    pending = null;
+  }
+}
+function bgClose(e, id) { if (e.target.id === id) closeSheet(id); }
+
+function openAdd() {
+  // pre-select current category
+  renderCatChips(S.page);
+  openSheet('addSheet');
+  setTimeout(() => document.getElementById('urlIn').focus(), 300);
+}
+
+function renderCatChips(activeIdx) {
+  document.getElementById('catChips').innerHTML = S.cats.map((c,i) =>
+    `<button class="chip ${i===activeIdx?'on':''}" data-c="${esc(c)}" onclick="pickChip(this)">${c}</button>`
   ).join('');
 }
-
-function selectChip(el) {
-  document.querySelectorAll('#catSelectGrid .chip').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
+function pickChip(el) {
+  document.querySelectorAll('#catChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
 }
 
-function renderCatModal() {
-  const cats = state.categories.filter(c=>c!=='전체');
-  document.getElementById('catList').innerHTML = cats.length === 0
-    ? '<p style="color:var(--muted);font-size:13px;text-align:center;padding:10px">카테고리가 없어요</p>'
-    : cats.map(cat => {
-        const n = state.links.filter(l=>l.category===cat).length;
-        return `<div class="cat-item">
-          <div><span class="cat-item-name">${cat}</span><span class="cat-item-count"> · ${n}개</span></div>
-          <button class="cat-del" onclick="deleteCategory('${esc(cat)}')">🗑️</button>
-        </div>`;
-      }).join('');
+// ── RENDER ────────────────────────────────────────────
+function goPage(i) {
+  S.page = i;
+  setTrack(trackX(), true);
+  renderCatBar();
 }
 
-function renderCards() {
-  const content = document.getElementById('content');
-  const links = state.activeTab === '전체'
-    ? state.links
-    : state.links.filter(l => l.category === state.activeTab);
+function renderCatBar() {
+  document.getElementById('catBar').innerHTML = S.cats.map((c,i) => {
+    const n = S.links.filter(l=>l.cat===c).length;
+    return `<button class="cat-pill ${i===S.page?'active':'inactive'}" onclick="goPage(${i})">
+      ${c}<span class="cat-count">${n||''}</span>
+    </button>`;
+  }).join('');
+  // scroll active pill into view
+  const pills = document.querySelectorAll('.cat-pill');
+  if (pills[S.page]) pills[S.page].scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
+}
 
-  if (links.length === 0) {
-    content.innerHTML = `<div class="empty">
-      <div class="empty-icon">${state.activeTab==='전체'?'📦':'✨'}</div>
-      <div class="empty-title">${state.activeTab==='전체'?'아직 저장된 링크가 없어요':'이 카테고리는 비어있어요'}</div>
-      <div class="empty-desc">아래 + 버튼을 눌러<br>첫 번째 링크를 추가해보세요</div>
-    </div>`;
-    return;
+function renderPages() {
+  const t = track();
+  // update page count
+  while (t.children.length < S.cats.length) {
+    const p = document.createElement('div');
+    p.className = 'page';
+    t.appendChild(p);
   }
+  while (t.children.length > S.cats.length) t.removeChild(t.lastChild);
+  t.style.width = (S.cats.length * 100) + '%';
+  Array.from(t.children).forEach(p => { p.style.width = (100/S.cats.length)+'%'; });
+  setTrack(trackX(), false);
+  rerenderCards();
+}
 
-  content.innerHTML = `<div class="cards">${links.map(l => cardHTML(l)).join('')}</div>`;
+function rerenderCards() {
+  const pages = document.querySelectorAll('.page');
+  pages.forEach((page, i) => {
+    const cat = S.cats[i];
+    const links = S.links.filter(l => l.cat === cat);
+    if (selMode) page.classList.add('select-mode');
+    else page.classList.remove('select-mode');
+    if (links.length === 0) {
+      page.innerHTML = `<div class="empty">
+        <div class="empty-icon">✦</div>
+        <div class="empty-title">비어있어요</div>
+        <div class="empty-hint">+ 버튼을 눌러<br>첫 링크를 추가해보세요</div>
+      </div>`;
+    } else {
+      page.innerHTML = `<div class="cards">${links.map(l => cardHTML(l)).join('')}</div>`;
+    }
+  });
 }
 
 function cardHTML(l) {
-  const isSelected = selectedIds.has(l.id);
+  const sel = selIds.has(l.id);
   const thumbHTML = l.thumb
     ? `<img class="card-thumb" src="${esc(l.thumb)}" alt="" loading="lazy"
-         onerror="this.outerHTML='<div class=\\'card-thumb-placeholder\\'>${PLATFORM_EMOJI[l.platform]||'🔗'}</div>'">`
-    : `<div class="card-thumb-placeholder">${PLATFORM_EMOJI[l.platform]||'🔗'}</div>`;
-
-  let hostname = '';
-  try { hostname = new URL(l.url).hostname.replace('www.',''); } catch(e) {}
-  const titleDisplay = l.title || hostname;
-
-  return `<div class="card ${isSelected?'selected':''}" data-id="${l.id}"
-    ontouchstart=""
-    onclick="onCardClick(event, '${l.id}')"
-    oncontextmenu="event.preventDefault(); onCardLongPress('${l.id}')">
-    <div class="card-check">${isSelected?'✓':''}</div>
-    ${!selectMode ? `<a href="${esc(l.url)}" target="_blank" rel="noopener" class="card-link" onclick="event.stopPropagation()"></a>` : ''}
-    ${thumbHTML}
+         onerror="this.outerHTML='<div class=\\'card-thumb-placeholder\\'>${PEMOJI[l.platform]||'⊙'}</div>'">`
+    : `<div class="card-thumb-placeholder">${PEMOJI[l.platform]||'⊙'}</div>`;
+  let host = '';
+  try { host = new URL(l.url).hostname.replace('www.',''); } catch(e) {}
+  const titleShow = l.title || host;
+  return `<div class="card ${sel?'selected':''}" data-id="${l.id}"
+    onclick="onCardTap(event,'${l.id}','${esc(l.url)}')"
+    oncontextmenu="event.preventDefault();if(!selMode)enterSel('${l.id}');else toggleSel('${l.id}')">
+    <div class="card-check">${sel?'✓':''}</div>
+    <div class="card-thumb-wrap">
+      ${thumbHTML}
+      <span class="card-platform p-${l.platform}">${PEMOJI[l.platform]} ${PLABEL[l.platform]}</span>
+    </div>
     <div class="card-body">
-      <span class="platform-badge badge-${l.platform}">${PLATFORM_EMOJI[l.platform]} ${PLATFORM_LABEL[l.platform]}</span>
-      ${titleDisplay ? `<div class="card-title">${esc(titleDisplay)}</div>` : ''}
-      ${l.memo ? `<div class="card-memo">"${esc(l.memo)}"</div>` : ''}
-      <div class="card-bottom-row">
-        <span class="card-date">${l.date} · ${esc(l.category)}</span>
-        ${!selectMode ? `<button class="card-del-btn" onclick="event.stopPropagation();openDeleteSingle('${l.id}')">🗑️</button>` : ''}
+      ${titleShow?`<div class="card-title">${esc(titleShow)}</div>`:''}
+      ${l.memo?`<div class="card-memo">"${esc(l.memo)}"</div>`:''}
+      <div class="card-footer">
+        <span class="card-date">${l.date}</span>
+        <button class="card-del" onclick="event.stopPropagation();askDeleteSingle('${l.id}')">✕</button>
       </div>
     </div>
   </div>`;
 }
 
-// ── LONG PRESS ────────────────────────────────────────
-let pressTimer = null;
-let pressId = null;
-
-function onCardClick(e, id) {
-  if (selectMode) {
-    e.preventDefault();
-    toggleSelect(id);
-  }
+function onCardTap(e, id, url) {
+  if (selMode) { toggleSel(id); return; }
+  // let the link work via native tap (not blocked)
 }
 
-// Long press via touchstart/touchend
-document.addEventListener('touchstart', function(e) {
-  const card = e.target.closest('.card');
-  if (!card) return;
-  pressId = card.dataset.id;
-  pressTimer = setTimeout(() => {
-    if (!selectMode) enterSelectMode(pressId);
-    else toggleSelect(pressId);
-    pressTimer = null;
-  }, 500);
-}, {passive: true});
-
-document.addEventListener('touchend', function() {
-  clearTimeout(pressTimer);
-  pressTimer = null;
-}, {passive: true});
-
-document.addEventListener('touchmove', function() {
-  clearTimeout(pressTimer);
-  pressTimer = null;
-}, {passive: true});
-
-function onCardLongPress(id) {
-  if (!selectMode) enterSelectMode(id);
-  else toggleSelect(id);
+function render() {
+  renderCatBar();
+  renderPages();
 }
 
 // ── HELPERS ───────────────────────────────────────────
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('on'), 2000);
 }
 
-function render() { renderTabs(); renderCards(); }
-
 // ── INIT ──────────────────────────────────────────────
-loadState();
+loadS();
+if (S.page >= S.cats.length) S.page = 0;
 render();
 </script>
 </body>
