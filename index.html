@@ -23,6 +23,7 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
 }
+
 html, body { height: 100%; overflow: hidden; background: var(--black); color: var(--white); font-family: -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
 
 #app { display: flex; flex-direction: column; height: 100dvh; height: 100vh; }
@@ -47,7 +48,7 @@ html, body { height: 100%; overflow: hidden; background: var(--black); color: va
 /* PAGES */
 .pages-wrap { flex:1; overflow:hidden; position:relative; }
 .pages-track { display:flex; height:100%; will-change:transform; }
-.page { flex-shrink:0; width:100%; height:100%; overflow-y:auto; padding:4px 16px calc(var(--safe-bot) + 90px); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.page { flex-shrink:0; width:100%; height:100%; overflow-y:auto; padding:4px 16px calc(var(--safe-bot) + 160px); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
 .page::-webkit-scrollbar { display:none; }
 
 /* EMPTY */
@@ -100,7 +101,7 @@ html, body { height: 100%; overflow: hidden; background: var(--black); color: va
 .sbtn-cancel { background:var(--g2); color:var(--g5); }
 
 /* FAB */
-.fab { position:fixed; right:20px; bottom:calc(var(--safe-bot)+22px); width:52px; height:52px; border-radius:50%; background:var(--accent); border:none; color:var(--black); font-size:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 24px rgba(232,255,71,.35); cursor:pointer; z-index:100; transition:transform .15s; }
+.fab { position:fixed; right:20px; bottom:calc(var(--safe-bot) + 80px); width:52px; height:52px; border-radius:50%; background:var(--accent); border:none; color:var(--black); font-size:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 24px rgba(232,255,71,.35); cursor:pointer; z-index:100; transition:transform .15s; }
 .fab:active { transform:scale(.9); }
 
 /* OVERLAY + SHEET */
@@ -248,7 +249,7 @@ html, body { height: 100%; overflow: hidden; background: var(--black); color: va
 <script>
 // ── DATA ─────────────────────────────────────────────
 // 이전 버전 키도 마이그레이션
-const KEY = 'linkbox_v3';
+const KEY = 'linkbox_v5';
 let S = {
   cats: ['🍳 요리/맛집','💪 운동/건강','🎵 음악','🤖 AI','📰 뉴스/정보','🛍️ 쇼핑','😂 재미/유머'],
   links: [],
