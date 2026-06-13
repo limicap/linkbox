@@ -257,13 +257,13 @@ let S = {
 };
 function loadS() {
   try {
-    // v3 마이그레이션
-    const v3 = localStorage.getItem('linkbox_v3');
+    // v5 우선, 없으면 이전 버전 마이그레이션
+    const v5 = localStorage.getItem('linkbox_v5');
     const v4 = localStorage.getItem('linkbox_v4');
-    const raw = v4 || v3;
+    const v3 = localStorage.getItem('linkbox_v3');
+    const raw = v5 || v4 || v3;
     if (raw) {
       const p = JSON.parse(raw);
-      // v3 구조는 links[].category, v4는 links[].cat
       if (p.links) {
         p.links = p.links.map(l => ({
           ...l,
