@@ -9,430 +9,173 @@
 <title>LinkBox</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 :root {
   --black: #080808;
   --white: #f5f5f5;
-  --gray1: #111111;
-  --gray2: #1c1c1c;
-  --gray3: #2a2a2a;
-  --gray4: #444;
-  --gray5: #888;
+  --g1: #111;
+  --g2: #1c1c1c;
+  --g3: #2a2a2a;
+  --g4: #444;
+  --g5: #777;
   --accent: #e8ff47;
-  --accent-dim: rgba(232,255,71,0.12);
-  --radius: 16px;
+  --red: #ff5555;
+  --r: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
 }
+html, body { height: 100%; overflow: hidden; background: var(--black); color: var(--white); font-family: -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
 
-html, body {
-  height: 100%;
-  overflow: hidden;
-  background: var(--black);
-  color: var(--white);
-  font-family: -apple-system, 'SF Pro Display', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+#app { display: flex; flex-direction: column; height: 100dvh; height: 100vh; }
 
-/* ── APP SHELL ── */
-#app {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  height: 100vh;
-}
+/* HEADER */
+.hdr { flex-shrink:0; padding: calc(var(--safe-top) + 14px) 18px 0; z-index:50; }
+.hdr-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.logo { font-size:22px; font-weight:800; letter-spacing:-1px; }
+.logo em { color:var(--accent); font-style:normal; }
+.mgr-btn { background:var(--g2); border:none; border-radius:10px; color:var(--g5); width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; }
+.mgr-btn:active { opacity:.6; }
 
-/* ── HEADER ── */
-.header {
-  flex-shrink: 0;
-  padding: calc(var(--safe-top) + 14px) 20px 0;
-  position: relative;
-  z-index: 50;
-}
+/* CAT BAR */
+.cat-bar { display:flex; gap:5px; overflow-x:auto; scrollbar-width:none; padding-bottom:12px; }
+.cat-bar::-webkit-scrollbar { display:none; }
+.cpill { flex-shrink:0; height:28px; padding:0 12px; border-radius:14px; font-size:12px; font-weight:700; border:none; font-family:inherit; cursor:pointer; transition:all .18s; white-space:nowrap; display:flex; align-items:center; gap:4px; }
+.cpill.on { background:var(--accent); color:var(--black); }
+.cpill.off { background:var(--g2); color:var(--g5); }
+.cpill:active { opacity:.7; }
+.cpill-n { font-size:10px; font-family:monospace; opacity:.65; }
 
-.header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
+/* PAGES */
+.pages-wrap { flex:1; overflow:hidden; position:relative; }
+.pages-track { display:flex; height:100%; will-change:transform; }
+.page { flex-shrink:0; width:100%; height:100%; overflow-y:auto; padding:4px 16px calc(var(--safe-bot) + 90px); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.page::-webkit-scrollbar { display:none; }
 
-.logo {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  color: var(--white);
-}
-.logo span { color: var(--accent); }
+/* EMPTY */
+.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:55%; gap:10px; color:var(--g4); text-align:center; }
+.empty-icon { font-size:40px; opacity:.35; margin-bottom:4px; }
+.empty-t { font-size:15px; font-weight:700; color:var(--g5); }
+.empty-s { font-size:12px; color:var(--g4); line-height:1.7; }
 
-.cat-manage-btn {
-  width: 34px; height: 34px;
-  background: var(--gray2);
-  border: none; border-radius: 10px;
-  color: var(--gray5);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; cursor: pointer;
-}
-.cat-manage-btn:active { opacity: 0.6; }
+/* CARDS */
+.cards { display:flex; flex-direction:column; gap:10px; }
+.card { border-radius:var(--r); overflow:hidden; background:var(--g1); border:1.5px solid var(--g2); position:relative; user-select:none; -webkit-user-select:none; transition:transform .1s, border-color .15s; }
+.card.selected { border-color:var(--accent); }
 
-/* ── CATEGORY INDICATOR ── */
-.cat-bar {
-  display: flex;
-  gap: 5px;
-  margin-bottom: 14px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-}
-.cat-bar::-webkit-scrollbar { display: none; }
+.card-thumb-wrap { position:relative; width:100%; aspect-ratio:16/9; background:var(--g2); overflow:hidden; }
+.card-thumb { width:100%; height:100%; object-fit:cover; display:block; }
+.card-thumb-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:34px; }
+.card-thumb-wrap::after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom, transparent 45%, rgba(8,8,8,.8) 100%); pointer-events:none; }
+.card-plat { position:absolute; bottom:8px; left:10px; z-index:2; font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; padding:3px 7px; border-radius:6px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+.pp-youtube   { background:rgba(255,60,60,.25);  color:#ff8080;  border:1px solid rgba(255,60,60,.3); }
+.pp-instagram { background:rgba(225,48,108,.2);  color:#f48fb1;  border:1px solid rgba(225,48,108,.3); }
+.pp-twitter   { background:rgba(29,155,240,.2);  color:#90caf9;  border:1px solid rgba(29,155,240,.3); }
+.pp-tiktok    { background:rgba(105,201,208,.2); color:#80deea;  border:1px solid rgba(105,201,208,.3); }
+.pp-other     { background:rgba(120,120,120,.2); color:#aaa;     border:1px solid rgba(120,120,120,.3); }
 
-.cat-pill {
-  flex-shrink: 0;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 14px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.cat-pill.active {
-  background: var(--accent);
-  color: var(--black);
-}
-.cat-pill.inactive {
-  background: var(--gray2);
-  color: var(--gray5);
-}
-.cat-pill:active { opacity: 0.7; }
+.card-body { padding:10px 12px 10px; }
+.card-title { font-size:14px; font-weight:600; line-height:1.4; margin-bottom:7px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.card-memo { font-size:12px; color:var(--g5); margin-bottom:7px; font-style:italic; line-height:1.5; }
+.card-foot { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:5; }
+.card-date { font-size:10px; color:var(--g4); font-family:monospace; }
+.card-del { background:none; border:none; color:var(--g4); font-size:14px; cursor:pointer; padding:4px 6px; border-radius:6px; }
+.card-del:active { color:var(--red); }
 
-.cat-count {
-  font-size: 10px;
-  font-family: 'SF Mono', 'Menlo', monospace;
-  margin-left: 4px;
-  opacity: 0.6;
-}
+/* checkbox */
+.card-chk { display:none; position:absolute; top:9px; right:9px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(8,8,8,.55); border:2px solid rgba(255,255,255,.3); align-items:center; justify-content:center; font-size:13px; font-weight:800; color:var(--black); backdrop-filter:blur(6px); }
+.sel-mode .card-chk { display:flex; }
+.card.selected .card-chk { background:var(--accent); border-color:var(--accent); }
 
-/* ── SWIPE CONTAINER ── */
-.pages-wrapper {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
+/* card anchor covers whole card but sits below buttons */
+.card-anchor { position:absolute; inset:0; z-index:1; }
 
-.pages-track {
-  display: flex;
-  height: 100%;
-  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
-  will-change: transform;
-}
+/* SELECT BANNER */
+.sel-ban { display:none; position:fixed; top:0; left:0; right:0; z-index:200; padding:calc(var(--safe-top)+12px) 16px 12px; background:rgba(8,8,8,.96); border-bottom:1px solid var(--g3); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); align-items:center; justify-content:space-between; }
+.sel-ban.on { display:flex; }
+.sel-n { font-size:14px; font-weight:800; }
+.sel-btns { display:flex; gap:8px; }
+.sbtn { padding:7px 14px; border-radius:20px; font-size:13px; font-weight:700; border:none; cursor:pointer; font-family:inherit; }
+.sbtn:active { opacity:.7; }
+.sbtn-move   { background:var(--accent); color:var(--black); }
+.sbtn-del    { background:var(--g3); color:var(--red); }
+.sbtn-cancel { background:var(--g2); color:var(--g5); }
 
-.page {
-  flex-shrink: 0;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  padding: 0 16px 80px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.page::-webkit-scrollbar { display: none; }
+/* FAB */
+.fab { position:fixed; right:20px; bottom:calc(var(--safe-bot)+22px); width:52px; height:52px; border-radius:50%; background:var(--accent); border:none; color:var(--black); font-size:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 24px rgba(232,255,71,.35); cursor:pointer; z-index:100; transition:transform .15s; }
+.fab:active { transform:scale(.9); }
 
-/* ── EMPTY STATE ── */
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 60%;
-  gap: 10px;
-  color: var(--gray4);
-  text-align: center;
-}
-.empty-icon {
-  font-size: 44px;
-  margin-bottom: 4px;
-  filter: grayscale(1);
-  opacity: 0.4;
-}
-.empty-title { font-size: 15px; font-weight: 700; color: var(--gray5); }
-.empty-hint { font-size: 12px; color: var(--gray4); line-height: 1.6; }
-
-/* ── CARDS ── */
-.cards { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
-
-.card {
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--gray1);
-  position: relative;
-  border: 1px solid var(--gray2);
-  transition: transform 0.12s;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.card:active:not(.selecting) { transform: scale(0.97); }
-.card.selected { border-color: var(--accent); }
-
-/* thumb */
-.card-thumb-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: var(--gray2);
-}
-.card-thumb {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-}
-.card-thumb-placeholder {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 36px;
-  background: var(--gray2);
-}
-/* gradient overlay */
-.card-thumb-wrap::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(8,8,8,0.85) 100%);
-  pointer-events: none;
-}
-/* platform badge on thumb */
-.card-platform {
-  position: absolute;
-  bottom: 8px; left: 10px;
-  z-index: 2;
-  font-size: 10px; font-weight: 800;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  padding: 3px 7px;
-  border-radius: 6px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.p-youtube  { background: rgba(255,60,60,0.3);  color: #ff8080; border: 1px solid rgba(255,60,60,0.3); }
-.p-instagram{ background: rgba(225,48,108,0.25);color: #f48fb1; border: 1px solid rgba(225,48,108,0.3); }
-.p-twitter  { background: rgba(29,155,240,0.2); color: #90caf9; border: 1px solid rgba(29,155,240,0.3); }
-.p-tiktok   { background: rgba(105,201,208,0.2);color: #80deea; border: 1px solid rgba(105,201,208,0.3); }
-.p-other    { background: rgba(100,100,100,0.25);color: #aaa;   border: 1px solid rgba(100,100,100,0.3); }
-
-/* card body */
-.card-body {
-  padding: 10px 12px 10px;
-}
-.card-title {
-  font-size: 14px; font-weight: 600;
-  line-height: 1.4; color: var(--white);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  margin-bottom: 8px;
-}
-.card-memo {
-  font-size: 12px; color: var(--gray5);
-  margin-bottom: 8px; font-style: italic; line-height: 1.5;
-}
-.card-footer {
-  display: flex; align-items: center; justify-content: space-between;
-}
-.card-date {
-  font-size: 10px; color: var(--gray4);
-  font-family: 'SF Mono', monospace;
-}
-.card-del {
-  background: none; border: none; color: var(--gray4);
-  font-size: 14px; cursor: pointer; padding: 4px 6px;
-  border-radius: 6px; position: relative; z-index: 5;
-}
-.card-del:active { color: #ff5555; }
-
-/* select checkbox */
-.card-check {
-  display: none;
-  position: absolute; top: 10px; right: 10px; z-index: 10;
-  width: 26px; height: 26px; border-radius: 50%;
-  background: rgba(8,8,8,0.5);
-  border: 2px solid rgba(255,255,255,0.3);
-  align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: var(--black);
-  backdrop-filter: blur(4px);
-}
-.select-mode .card-check { display: flex; }
-.card.selected .card-check { background: var(--accent); border-color: var(--accent); }
-.card-link { position: absolute; inset: 0; z-index: 1; }
-.card-footer { position: relative; z-index: 5; }
-
-/* ── SELECT BANNER ── */
-.select-banner {
-  display: none;
-  position: fixed; top: 0; left: 0; right: 0;
-  z-index: 200;
-  padding: calc(var(--safe-top) + 12px) 16px 12px;
-  background: rgba(8,8,8,0.95);
-  border-bottom: 1px solid var(--gray3);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  align-items: center; justify-content: space-between;
-  gap: 8px;
-}
-.select-banner.visible { display: flex; }
-.sel-count { font-size: 14px; font-weight: 700; }
-.sel-actions { display: flex; gap: 8px; }
-.sel-btn {
-  padding: 7px 14px; border-radius: 20px;
-  font-size: 13px; font-weight: 700;
-  border: none; cursor: pointer; font-family: inherit;
-}
-.sel-btn.move { background: var(--accent); color: var(--black); }
-.sel-btn.del  { background: var(--gray3); color: #ff6b6b; }
-.sel-btn.cancel { background: var(--gray2); color: var(--gray5); }
-.sel-btn:active { opacity: 0.7; }
-
-/* ── FAB ── */
-.fab {
-  position: fixed;
-  right: 20px;
-  bottom: calc(var(--safe-bottom) + 24px);
-  width: 52px; height: 52px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: none; color: var(--black);
-  font-size: 26px; font-weight: 300;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 24px rgba(232,255,71,0.35);
-  cursor: pointer; z-index: 100;
-  transition: transform 0.15s;
-}
-.fab:active { transform: scale(0.9); }
-
-/* ── MODAL ── */
-.overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.75); z-index: 300;
-  align-items: flex-end;
-}
-.overlay.open { display: flex; }
-.sheet {
-  background: var(--gray1);
-  border-radius: 24px 24px 0 0;
-  width: 100%;
-  padding: 20px 20px calc(var(--safe-bottom) + 32px);
-  border-top: 1px solid var(--gray3);
-  animation: up 0.28s cubic-bezier(0.4,0,0.2,1);
-  max-height: 88vh; overflow-y: auto;
-}
-@keyframes up { from { transform: translateY(40px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-.sheet-handle { width: 32px; height: 4px; background: var(--gray3); border-radius: 2px; margin: 0 auto 18px; }
-.sheet-title { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 18px; }
+/* OVERLAY + SHEET */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:300; align-items:flex-end; }
+.overlay.on { display:flex; }
+.sheet { background:var(--g1); border-radius:22px 22px 0 0; width:100%; padding:20px 20px calc(var(--safe-bot)+32px); border-top:1px solid var(--g3); animation:up .26s cubic-bezier(.4,0,.2,1); max-height:88vh; overflow-y:auto; }
+@keyframes up { from { transform:translateY(36px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.s-handle { width:32px; height:4px; background:var(--g3); border-radius:2px; margin:0 auto 18px; }
+.s-title { font-size:18px; font-weight:800; letter-spacing:-.5px; margin-bottom:18px; }
 
 /* FORM */
-.field { margin-bottom: 14px; }
-.label {
-  font-size: 10px; font-weight: 800; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--gray5); margin-bottom: 8px; display: block;
-}
-.input {
-  width: 100%; background: var(--gray2); border: 1.5px solid var(--gray3);
-  color: var(--white); padding: 13px 14px; border-radius: 12px;
-  font-size: 15px; outline: none; font-family: inherit;
-  -webkit-appearance: none; transition: border-color 0.15s;
-}
-.input:focus { border-color: var(--accent); }
-.input::placeholder { color: var(--gray4); }
+.field { margin-bottom:14px; }
+.lbl { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--g5); margin-bottom:7px; display:block; }
+.inp { width:100%; background:var(--g2); border:1.5px solid var(--g3); color:var(--white); padding:13px 14px; border-radius:12px; font-size:15px; outline:none; font-family:inherit; -webkit-appearance:none; transition:border-color .15s; }
+.inp:focus { border-color:var(--accent); }
+.inp::placeholder { color:var(--g4); }
 
-.preview-box {
-  display: none; background: var(--gray2); border: 1px solid var(--gray3);
-  border-radius: 12px; padding: 10px; align-items: center; gap: 10px; margin-top: 8px;
-}
-.preview-box.on { display: flex; }
-.preview-box img { width: 56px; height: 38px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
-.preview-info { flex: 1; overflow: hidden; }
-.preview-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.preview-host  { font-size: 11px; color: var(--gray5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; }
+.prev-box { display:none; background:var(--g2); border:1px solid var(--g3); border-radius:12px; padding:10px; align-items:center; gap:10px; margin-top:8px; }
+.prev-box.on { display:flex; }
+.prev-box img { width:56px; height:38px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+.prev-info { flex:1; overflow:hidden; }
+.prev-t { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prev-h { font-size:11px; color:var(--g5); font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip {
-  padding: 7px 13px; border-radius: 20px; font-size: 13px; font-weight: 700;
-  cursor: pointer; border: 1.5px solid var(--gray3); background: transparent; color: var(--gray5);
-  font-family: inherit; transition: all 0.12s;
-}
-.chip.on { background: var(--accent); border-color: var(--accent); color: var(--black); }
-.chip:active { opacity: 0.7; }
+.chip-row { display:flex; flex-wrap:wrap; gap:6px; }
+.chip { padding:7px 13px; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; border:1.5px solid var(--g3); background:transparent; color:var(--g5); font-family:inherit; transition:all .12s; }
+.chip.on { background:var(--accent); border-color:var(--accent); color:var(--black); }
+.chip:active { opacity:.7; }
 
-.btn {
-  width: 100%; padding: 15px; border-radius: 14px;
-  font-size: 15px; font-weight: 800; border: none; cursor: pointer;
-  font-family: inherit; letter-spacing: -0.3px;
-  transition: opacity 0.15s;
-}
-.btn:active { opacity: 0.75; }
-.btn-accent { background: var(--accent); color: var(--black); }
-.btn-ghost  { background: var(--gray2); color: var(--white); border: 1px solid var(--gray3); margin-top: 8px; }
-.btn-red    { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.2); margin-top: 8px; }
+.btn { width:100%; padding:15px; border-radius:14px; font-size:15px; font-weight:800; border:none; cursor:pointer; font-family:inherit; letter-spacing:-.3px; }
+.btn:active { opacity:.75; }
+.btn-a { background:var(--accent); color:var(--black); }
+.btn-g { background:var(--g2); color:var(--white); border:1px solid var(--g3); margin-top:8px; }
+.btn-r { background:rgba(255,80,80,.1); color:var(--red); border:1px solid rgba(255,80,80,.2); margin-top:8px; }
 
-.loader { display: none; align-items: center; gap: 8px; font-size: 12px; color: var(--gray5); padding: 8px 0; }
-.loader.on { display: flex; }
-.spin { width: 14px; height: 14px; border: 2px solid var(--gray3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.loader { display:none; align-items:center; gap:8px; font-size:12px; color:var(--g5); padding:8px 0; }
+.loader.on { display:flex; }
+.spin { width:14px; height:14px; border:2px solid var(--g3); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-/* CAT LIST in manage sheet */
-.cat-row {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--gray2); border: 1px solid var(--gray3);
-  border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
-}
-.cat-row-name { font-size: 14px; font-weight: 700; }
-.cat-row-count { font-size: 11px; color: var(--gray5); font-family: monospace; margin-left: 6px; }
-.cat-row-del { background: none; border: none; color: var(--gray4); font-size: 16px; cursor: pointer; padding: 4px; }
-.cat-row-del:active { color: #ff5555; }
+.cat-row { display:flex; align-items:center; justify-content:space-between; background:var(--g2); border:1px solid var(--g3); border-radius:12px; padding:12px 14px; margin-bottom:8px; }
+.cat-row-nm { font-size:14px; font-weight:700; }
+.cat-row-n  { font-size:11px; color:var(--g5); font-family:monospace; margin-left:6px; }
+.cat-row-x  { background:none; border:none; color:var(--g4); font-size:16px; cursor:pointer; padding:4px; }
+.cat-row-x:active { color:var(--red); }
 
-/* MOVE SHEET */
-.move-btn {
-  width: 100%; padding: 14px 16px; border-radius: 12px;
-  background: var(--gray2); border: 1px solid var(--gray3);
-  color: var(--white); font-size: 14px; font-weight: 700;
-  font-family: inherit; cursor: pointer; text-align: left; margin-bottom: 8px;
-  transition: background 0.1s;
-}
-.move-btn:active { background: var(--accent); color: var(--black); border-color: var(--accent); }
+.move-btn { width:100%; padding:14px 16px; border-radius:12px; background:var(--g2); border:1px solid var(--g3); color:var(--white); font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; text-align:left; margin-bottom:8px; }
+.move-btn:active { background:var(--accent); color:var(--black); border-color:var(--accent); }
 
 /* TOAST */
-.toast {
-  position: fixed; bottom: calc(var(--safe-bottom) + 88px); left: 50%;
-  transform: translateX(-50%) translateY(16px);
-  background: var(--gray2); border: 1px solid var(--gray3);
-  color: var(--white); padding: 10px 20px; border-radius: 20px;
-  font-size: 13px; font-weight: 700; opacity: 0;
-  transition: all 0.22s; pointer-events: none; white-space: nowrap; z-index: 999;
-}
-.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast { position:fixed; bottom:calc(var(--safe-bot)+88px); left:50%; transform:translateX(-50%) translateY(16px); background:var(--g2); border:1px solid var(--g3); color:var(--white); padding:10px 20px; border-radius:20px; font-size:13px; font-weight:700; opacity:0; transition:all .22s; pointer-events:none; white-space:nowrap; z-index:999; }
+.toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="header">
-    <div class="header-row">
-      <div class="logo">link<span>.</span></div>
-      <button class="cat-manage-btn" onclick="openSheet('catSheet')">⊞</button>
+  <div class="hdr">
+    <div class="hdr-row">
+      <div class="logo">link<em>.</em></div>
+      <button class="mgr-btn" onclick="openSheet('catSheet')">⊞</button>
     </div>
     <div class="cat-bar" id="catBar"></div>
   </div>
-  <div class="pages-wrapper" id="pagesWrapper">
-    <div class="pages-track" id="pagesTrack"></div>
+  <div class="pages-wrap" id="pw">
+    <div class="pages-track" id="pt"></div>
   </div>
 </div>
 
 <!-- SELECT BANNER -->
-<div class="select-banner" id="selBanner">
-  <div class="sel-count" id="selCount">0개 선택</div>
-  <div class="sel-actions">
-    <button class="sel-btn move" onclick="openMoveSheet()">이동</button>
-    <button class="sel-btn del"  onclick="askDeleteSel()">삭제</button>
-    <button class="sel-btn cancel" onclick="exitSel()">취소</button>
+<div class="sel-ban" id="selBan">
+  <div class="sel-n" id="selN">0개 선택</div>
+  <div class="sel-btns">
+    <button class="sbtn sbtn-move" onclick="openMoveSheet()">이동</button>
+    <button class="sbtn sbtn-del"  onclick="askDelSel()">삭제</button>
+    <button class="sbtn sbtn-cancel" onclick="exitSel()">취소</button>
   </div>
 </div>
 
@@ -441,86 +184,100 @@ html, body {
 <!-- ADD SHEET -->
 <div class="overlay" id="addSheet" onclick="bgClose(event,'addSheet')">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">새 링크</div>
+    <div class="s-handle"></div>
+    <div class="s-title">새 링크</div>
     <div class="field">
-      <label class="label">URL</label>
-      <input class="input" id="urlIn" type="url" placeholder="https://..." oninput="onUrl()"
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      <div class="loader" id="loadingIndicator"><div class="spin"></div>불러오는 중...</div>
-      <div class="preview-box" id="previewBox">
+      <label class="lbl">URL</label>
+      <input class="inp" id="urlIn" type="url" placeholder="https://..." oninput="onUrl()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <div class="loader" id="ldg"><div class="spin"></div>불러오는 중...</div>
+      <div class="prev-box" id="prevBox">
         <img id="prevImg" src="" alt="">
-        <div class="preview-info">
-          <div class="preview-title" id="prevTitle"></div>
-          <div class="preview-host"  id="prevHost"></div>
-        </div>
+        <div class="prev-info"><div class="prev-t" id="prevT"></div><div class="prev-h" id="prevH"></div></div>
       </div>
     </div>
     <div class="field">
-      <label class="label">메모 (선택)</label>
-      <input class="input" id="memoIn" type="text" placeholder="나중에 뭔지 알 수 있게...">
+      <label class="lbl">메모 (선택)</label>
+      <input class="inp" id="memoIn" type="text" placeholder="나중에 뭔지 알 수 있게...">
     </div>
     <div class="field">
-      <label class="label">카테고리</label>
+      <label class="lbl">카테고리</label>
       <div class="chip-row" id="catChips"></div>
     </div>
-    <button class="btn btn-accent" onclick="doSave()">저장</button>
-    <button class="btn btn-ghost" onclick="closeSheet('addSheet')">취소</button>
+    <button class="btn btn-a" onclick="doSave()">저장</button>
+    <button class="btn btn-g" onclick="closeSheet('addSheet')">취소</button>
   </div>
 </div>
 
-<!-- CAT MANAGE SHEET -->
+<!-- CAT SHEET -->
 <div class="overlay" id="catSheet" onclick="bgClose(event,'catSheet')">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">카테고리</div>
-    <div id="catManageList"></div>
+    <div class="s-handle"></div>
+    <div class="s-title">카테고리</div>
+    <div id="catMgr"></div>
     <div style="display:flex;gap:8px;margin-top:4px;">
-      <input class="input" id="newCatIn" type="text" placeholder="새 카테고리 이름" style="flex:1" maxlength="20">
-      <button class="btn btn-accent" style="width:auto;padding:13px 18px" onclick="addCat()">추가</button>
+      <input class="inp" id="newCatIn" type="text" placeholder="새 카테고리 이름" style="flex:1" maxlength="20">
+      <button class="btn btn-a" style="width:auto;padding:13px 18px" onclick="addCat()">추가</button>
     </div>
-    <button class="btn btn-ghost" onclick="closeSheet('catSheet')">닫기</button>
+    <button class="btn btn-g" onclick="closeSheet('catSheet')">닫기</button>
   </div>
 </div>
 
 <!-- MOVE SHEET -->
 <div class="overlay" id="moveSheet" onclick="bgClose(event,'moveSheet')">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="moveTitleEl">카테고리 이동</div>
+    <div class="s-handle"></div>
+    <div class="s-title" id="moveTitle">카테고리 이동</div>
     <div id="moveTargets"></div>
-    <button class="btn btn-ghost" onclick="closeSheet('moveSheet')">취소</button>
+    <button class="btn btn-g" onclick="closeSheet('moveSheet')">취소</button>
   </div>
 </div>
 
-<!-- DELETE CONFIRM SHEET -->
+<!-- DELETE SHEET -->
 <div class="overlay" id="delSheet" onclick="bgClose(event,'delSheet')">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">삭제할까요?</div>
-    <p style="font-size:14px;color:#888;margin-bottom:20px;" id="delDesc"></p>
-    <button class="btn btn-red" onclick="doDelete()">삭제</button>
-    <button class="btn btn-ghost" onclick="closeSheet('delSheet')">취소</button>
+    <div class="s-handle"></div>
+    <div class="s-title">삭제할까요?</div>
+    <p style="font-size:14px;color:#666;margin-bottom:20px;" id="delDesc"></p>
+    <button class="btn btn-r" onclick="doDelete()">삭제</button>
+    <button class="btn btn-g" onclick="closeSheet('delSheet')">취소</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────
-const KEY = 'linkbox_v4';
+// ── DATA ─────────────────────────────────────────────
+// 이전 버전 키도 마이그레이션
+const KEY = 'linkbox_v3';
 let S = {
   cats: ['🍳 요리/맛집','💪 운동/건강','🎵 음악','🤖 AI','📰 뉴스/정보','🛍️ 쇼핑','😂 재미/유머'],
   links: [],
   page: 0
 };
-
 function loadS() {
-  try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch(e) {}
+  try {
+    // v3 마이그레이션
+    const v3 = localStorage.getItem('linkbox_v3');
+    const v4 = localStorage.getItem('linkbox_v4');
+    const raw = v4 || v3;
+    if (raw) {
+      const p = JSON.parse(raw);
+      // v3 구조는 links[].category, v4는 links[].cat
+      if (p.links) {
+        p.links = p.links.map(l => ({
+          ...l,
+          cat: l.cat || l.category || (p.cats||S.cats)[0]
+        }));
+      }
+      if (p.categories && !p.cats) p.cats = p.categories;
+      S = { ...S, ...p };
+    }
+  } catch(e) {}
+  if (S.page >= S.cats.length) S.page = 0;
 }
 function saveS() { localStorage.setItem(KEY, JSON.stringify(S)); }
 
-// ── PLATFORM ──────────────────────────────────────────
+// ── PLATFORM ─────────────────────────────────────────
 function plat(url) {
   if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
   if (/instagram\.com/.test(url)) return 'instagram';
@@ -528,362 +285,317 @@ function plat(url) {
   if (/tiktok\.com/.test(url)) return 'tiktok';
   return 'other';
 }
-const PLABEL = {youtube:'YouTube',instagram:'Instagram',twitter:'X',tiktok:'TikTok',other:'링크'};
-const PEMOJI = {youtube:'▶',instagram:'◈',twitter:'✕',tiktok:'♪',other:'⊙'};
+const PL = {youtube:'YouTube',instagram:'Instagram',twitter:'X',tiktok:'TikTok',other:'링크'};
+const PE = {youtube:'▶',instagram:'◈',twitter:'✕',tiktok:'♪',other:'⊙'};
 
-// ── FETCH PREVIEW ─────────────────────────────────────
-let fetchT = null, pending = null;
+// ── FETCH ─────────────────────────────────────────────
+let fetchT=null, pending=null;
 function onUrl() {
   clearTimeout(fetchT);
   const url = document.getElementById('urlIn').value.trim();
-  document.getElementById('previewBox').classList.remove('on');
+  document.getElementById('prevBox').classList.remove('on');
   pending = null;
   if (!url) return;
-  fetchT = setTimeout(() => doFetch(url), 650);
+  fetchT = setTimeout(()=>doFetch(url), 650);
 }
 async function doFetch(url) {
   const p = plat(url);
-  const loader = document.getElementById('loadingIndicator');
-  pending = { url, title:'', thumb:'', platform: p };
-  if (p === 'youtube') {
-    loader.classList.add('on');
+  pending = {url, title:'', thumb:'', platform:p};
+  if (p==='youtube') {
+    document.getElementById('ldg').classList.add('on');
     try {
       const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
       if (r.ok) {
         const d = await r.json();
-        pending = { url, title: d.title, thumb: d.thumbnail_url, platform: p };
-        showPreview(d.thumbnail_url, d.title, url);
-      } else showPreview('', 'YouTube', url);
-    } catch { showPreview('', 'YouTube', url); }
-    loader.classList.remove('on');
+        pending = {url, title:d.title, thumb:d.thumbnail_url, platform:p};
+        showPrev(d.thumbnail_url, d.title, url);
+      } else showPrev('','YouTube',url);
+    } catch { showPrev('','YouTube',url); }
+    document.getElementById('ldg').classList.remove('on');
   } else {
-    let host = '';
-    try { host = new URL(url).hostname.replace('www.',''); } catch(e) {}
-    showPreview('', PLABEL[p], host || url);
+    let host=''; try { host=new URL(url).hostname.replace('www.',''); } catch(e){}
+    showPrev('', PL[p], host||url);
   }
 }
-function showPreview(thumb, title, host) {
+function showPrev(thumb, title, host) {
   const img = document.getElementById('prevImg');
-  img.style.display = thumb ? 'block' : 'none';
-  if (thumb) img.src = thumb;
-  document.getElementById('prevTitle').textContent = title;
-  document.getElementById('prevHost').textContent = host;
-  document.getElementById('previewBox').classList.add('on');
+  img.style.display = thumb?'block':'none';
+  if(thumb) img.src=thumb;
+  document.getElementById('prevT').textContent=title;
+  document.getElementById('prevH').textContent=host;
+  document.getElementById('prevBox').classList.add('on');
 }
 
-// ── SAVE ──────────────────────────────────────────────
+// ── SAVE ─────────────────────────────────────────────
 function doSave() {
   const url = document.getElementById('urlIn').value.trim();
-  if (!url) { toast('URL을 입력해주세요'); return; }
+  if (!url) { showToast('URL을 입력해주세요'); return; }
   const memo = document.getElementById('memoIn').value.trim();
   const chip = document.querySelector('#catChips .chip.on');
-  const cat = chip ? chip.dataset.c : S.cats[0];
-  const base = pending || { url, title:'', thumb:'', platform: plat(url) };
-  const link = { ...base, memo, cat, id: Date.now().toString(), date: fmtDate(new Date()) };
-  S.links.unshift(link);
-  saveS();
-  render();
-  closeSheet('addSheet');
-  toast('저장됐어요');
+  const cat = chip ? chip.dataset.c : S.cats[S.page] || S.cats[0];
+  const base = pending || {url, title:'', thumb:'', platform:plat(url)};
+  S.links.unshift({...base, memo, cat, id:Date.now().toString(), date:fmtDate(new Date())});
+  saveS(); render(); closeSheet('addSheet'); showToast('저장됐어요 ✓');
 }
 function fmtDate(d) { return d.toLocaleDateString('ko-KR',{month:'short',day:'numeric'}); }
 
-// ── SELECT MODE ───────────────────────────────────────
-let selMode = false, selIds = new Set(), delSingleId = null;
-
+// ── SELECT ────────────────────────────────────────────
+let selMode=false, selIds=new Set(), delSingleId=null;
 function enterSel(id) {
-  selMode = true;
-  selIds = new Set([id]);
-  document.getElementById('fab').style.display = 'none';
-  updateSelBanner();
-  rerenderCards();
+  selMode=true; selIds=new Set([id]);
+  document.getElementById('fab').style.display='none';
+  updateSelBan(); rerenderCards();
 }
 function exitSel() {
-  selMode = false; selIds.clear();
-  document.getElementById('fab').style.display = 'flex';
-  document.getElementById('selBanner').classList.remove('visible');
+  selMode=false; selIds.clear();
+  document.getElementById('fab').style.display='flex';
+  document.getElementById('selBan').classList.remove('on');
   rerenderCards();
 }
 function toggleSel(id) {
-  if (selIds.has(id)) selIds.delete(id); else selIds.add(id);
-  if (selIds.size === 0) { exitSel(); return; }
-  updateSelBanner();
-  document.querySelectorAll('.card').forEach(c => {
-    const sel = selIds.has(c.dataset.id);
-    c.classList.toggle('selected', sel);
-    const chk = c.querySelector('.card-check');
-    if (chk) chk.textContent = sel ? '✓' : '';
+  if(selIds.has(id)) selIds.delete(id); else selIds.add(id);
+  if(selIds.size===0){exitSel();return;}
+  updateSelBan();
+  document.querySelectorAll('.card').forEach(c=>{
+    const s=selIds.has(c.dataset.id);
+    c.classList.toggle('selected',s);
+    const chk=c.querySelector('.card-chk');
+    if(chk) chk.textContent=s?'✓':'';
   });
 }
-function updateSelBanner() {
-  document.getElementById('selBanner').classList.add('visible');
-  document.getElementById('selCount').textContent = `${selIds.size}개 선택`;
+function updateSelBan() {
+  document.getElementById('selBan').classList.add('on');
+  document.getElementById('selN').textContent=`${selIds.size}개 선택`;
 }
 
-// ── MOVE ──────────────────────────────────────────────
+// ── MOVE ─────────────────────────────────────────────
 function openMoveSheet() {
-  const curCats = [...new Set([...selIds].map(id => S.links.find(l=>l.id===id)?.cat).filter(Boolean))];
-  const targets = S.cats.filter(c => !curCats.includes(c));
-  document.getElementById('moveTitleEl').textContent = `${selIds.size}개 링크 이동`;
-  const el = document.getElementById('moveTargets');
-  el.innerHTML = targets.length === 0
-    ? '<p style="color:#666;font-size:13px;text-align:center;padding:12px 0">이동 가능한 카테고리가 없어요</p>'
-    : targets.map(c => `<button class="move-btn" onclick="doMove('${esc(c)}')">${c}</button>`).join('');
+  const cur=[...new Set([...selIds].map(id=>S.links.find(l=>l.id===id)?.cat).filter(Boolean))];
+  const targets=S.cats.filter(c=>!cur.includes(c));
+  document.getElementById('moveTitle').textContent=`${selIds.size}개 이동`;
+  document.getElementById('moveTargets').innerHTML=targets.length===0
+    ?'<p style="color:#555;font-size:13px;text-align:center;padding:12px 0">이동 가능한 카테고리가 없어요</p>'
+    :targets.map(c=>`<button class="move-btn" onclick="doMove('${esc(c)}')">${c}</button>`).join('');
   openSheet('moveSheet');
 }
 function doMove(cat) {
-  S.links = S.links.map(l => selIds.has(l.id) ? {...l, cat} : l);
-  saveS(); closeSheet('moveSheet'); exitSel();
-  toast(`'${cat}'으로 이동했어요`);
+  S.links=S.links.map(l=>selIds.has(l.id)?{...l,cat}:l);
+  saveS(); closeSheet('moveSheet'); exitSel(); showToast(`'${cat}'으로 이동했어요`);
 }
 
 // ── DELETE ────────────────────────────────────────────
-function askDeleteSingle(id) {
-  delSingleId = id;
-  document.getElementById('delDesc').textContent = '이 링크를 삭제할까요? 되돌릴 수 없어요.';
+function askDelSingle(id) {
+  delSingleId=id;
+  document.getElementById('delDesc').textContent='이 링크를 삭제할까요? 되돌릴 수 없어요.';
   openSheet('delSheet');
 }
-function askDeleteSel() {
-  delSingleId = null;
-  document.getElementById('delDesc').textContent = `선택한 ${selIds.size}개 링크를 모두 삭제할까요?`;
+function askDelSel() {
+  delSingleId=null;
+  document.getElementById('delDesc').textContent=`선택한 ${selIds.size}개 링크를 모두 삭제할까요?`;
   openSheet('delSheet');
 }
 function doDelete() {
-  if (delSingleId) {
-    S.links = S.links.filter(l => l.id !== delSingleId);
-    delSingleId = null;
-  } else {
-    S.links = S.links.filter(l => !selIds.has(l.id));
-    exitSel();
-  }
-  saveS(); render(); closeSheet('delSheet'); toast('삭제했어요');
+  if(delSingleId){S.links=S.links.filter(l=>l.id!==delSingleId);delSingleId=null;}
+  else{S.links=S.links.filter(l=>!selIds.has(l.id));exitSel();}
+  saveS(); render(); closeSheet('delSheet'); showToast('삭제했어요');
 }
 
 // ── CATEGORIES ────────────────────────────────────────
 function addCat() {
-  const v = document.getElementById('newCatIn').value.trim();
-  if (!v) return;
-  if (S.cats.includes(v)) { toast('이미 있는 카테고리예요'); return; }
-  S.cats.push(v);
-  saveS(); renderCatManage(); render();
-  document.getElementById('newCatIn').value = '';
+  const v=document.getElementById('newCatIn').value.trim();
+  if(!v) return;
+  if(S.cats.includes(v)){showToast('이미 있어요');return;}
+  S.cats.push(v); saveS(); renderCatMgr(); render();
+  document.getElementById('newCatIn').value='';
 }
 function delCat(cat) {
-  const n = S.links.filter(l=>l.cat===cat).length;
-  if (n > 0 && !confirm(`'${cat}' 카테고리의 링크 ${n}개도 삭제됩니다.`)) return;
-  S.cats = S.cats.filter(c=>c!==cat);
-  S.links = S.links.filter(l=>l.cat!==cat);
-  if (S.page >= S.cats.length) S.page = Math.max(0, S.cats.length - 1);
-  saveS(); renderCatManage(); render();
+  const n=S.links.filter(l=>l.cat===cat).length;
+  if(n>0&&!confirm(`'${cat}' 카테고리의 링크 ${n}개도 삭제됩니다.`)) return;
+  S.cats=S.cats.filter(c=>c!==cat);
+  S.links=S.links.filter(l=>l.cat!==cat);
+  if(S.page>=S.cats.length) S.page=Math.max(0,S.cats.length-1);
+  saveS(); renderCatMgr(); render();
 }
-function renderCatManage() {
-  document.getElementById('catManageList').innerHTML = S.cats.map(cat => {
-    const n = S.links.filter(l=>l.cat===cat).length;
+function renderCatMgr() {
+  document.getElementById('catMgr').innerHTML=S.cats.map(cat=>{
+    const n=S.links.filter(l=>l.cat===cat).length;
     return `<div class="cat-row">
-      <span class="cat-row-name">${cat}<span class="cat-row-count">${n}</span></span>
-      <button class="cat-row-del" onclick="delCat('${esc(cat)}')">✕</button>
+      <span class="cat-row-nm">${cat}<span class="cat-row-n"> ${n}</span></span>
+      <button class="cat-row-x" onclick="delCat('${esc(cat)}')">✕</button>
     </div>`;
   }).join('');
 }
 
 // ── SWIPE ─────────────────────────────────────────────
-let tsX = 0, tsY = 0, dragging = false, dragDx = 0;
-const wrapper = () => document.getElementById('pagesWrapper');
-const track   = () => document.getElementById('pagesTrack');
-
-function trackX() { return -S.page * wrapper().offsetWidth; }
-function setTrack(x, animate) {
-  const t = track();
-  t.style.transition = animate ? 'transform 0.32s cubic-bezier(0.4,0,0.2,1)' : 'none';
-  t.style.transform = `translateX(${x}px)`;
+let tsX=0,tsY=0,isDrag=false,dragDx=0,swipeLocked=false;
+const pw=()=>document.getElementById('pw');
+const pt=()=>document.getElementById('pt');
+function txBase(){return -S.page*pw().offsetWidth;}
+function setTx(x,anim){
+  const t=pt();
+  t.style.transition=anim?'transform .3s cubic-bezier(.4,0,.2,1)':'none';
+  t.style.transform=`translateX(${x}px)`;
 }
 
-document.addEventListener('touchstart', e => {
-  if (e.target.closest('.overlay') || e.target.closest('.select-banner') || e.target.closest('.fab')) return;
-  const card = e.target.closest('.card');
-  if (card) {
-    pressId = card.dataset.id;
-    pressTimer = setTimeout(() => {
-      if (!selMode) enterSel(pressId);
-      else toggleSel(pressId);
-      pressTimer = null;
-    }, 480);
+document.addEventListener('touchstart',e=>{
+  if(e.target.closest('.overlay')||e.target.closest('.sel-ban')||e.target.closest('.fab')) return;
+  // long press
+  const card=e.target.closest('.card');
+  if(card){
+    pressId=card.dataset.id;
+    pressTimer=setTimeout(()=>{
+      if(!selMode) enterSel(pressId); else toggleSel(pressId);
+      pressTimer=null;
+    },480);
   }
-  tsX = e.touches[0].clientX;
-  tsY = e.touches[0].clientY;
-  dragging = false; dragDx = 0;
-}, {passive:true});
+  tsX=e.touches[0].clientX; tsY=e.touches[0].clientY;
+  isDrag=false; dragDx=0; swipeLocked=false;
+},{passive:true});
 
-document.addEventListener('touchmove', e => {
-  if (selMode) return;
-  clearTimeout(pressTimer); pressTimer = null;
-  const dx = e.touches[0].clientX - tsX;
-  const dy = e.touches[0].clientY - tsY;
-  if (!dragging && Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
-  if (!dragging && Math.abs(dx) > 6) { dragging = true; }
-  if (dragging) {
-    // Check if current page scroll position allows horizontal swipe
-    const page = document.querySelectorAll('.page')[S.page];
-    if (!page) return;
-    dragDx = dx;
-    setTrack(trackX() + dx * 0.6, false);
+document.addEventListener('touchmove',e=>{
+  clearTimeout(pressTimer); pressTimer=null;
+  if(selMode||e.target.closest('.overlay')) return;
+  const dx=e.touches[0].clientX-tsX;
+  const dy=e.touches[0].clientY-tsY;
+  if(!isDrag){
+    if(Math.abs(dy)>Math.abs(dx)+4) {swipeLocked=true; return;}
+    if(Math.abs(dx)>8) isDrag=true;
   }
-}, {passive:true});
+  if(isDrag&&!swipeLocked){
+    dragDx=dx;
+    setTx(txBase()+dx*.55,false);
+  }
+},{passive:true});
 
-document.addEventListener('touchend', e => {
-  clearTimeout(pressTimer); pressTimer = null;
-  if (!dragging) return;
-  dragging = false;
-  const threshold = wrapper().offsetWidth * 0.25;
-  if (dragDx < -threshold && S.page < S.cats.length - 1) S.page++;
-  else if (dragDx > threshold && S.page > 0) S.page--;
-  setTrack(trackX(), true);
+document.addEventListener('touchend',e=>{
+  clearTimeout(pressTimer); pressTimer=null;
+  if(!isDrag||swipeLocked) return;
+  isDrag=false;
+  const thr=pw().offsetWidth*.22;
+  if(dragDx<-thr&&S.page<S.cats.length-1) S.page++;
+  else if(dragDx>thr&&S.page>0) S.page--;
+  setTx(txBase(),true);
   renderCatBar();
-}, {passive:true});
+},{passive:true});
 
-// ── LONG PRESS ────────────────────────────────────────
-let pressTimer = null, pressId = null;
+let pressTimer=null,pressId=null;
 
 // ── SHEETS ────────────────────────────────────────────
-function openSheet(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeSheet(id) {
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
-  if (id === 'addSheet') {
-    document.getElementById('urlIn').value = '';
-    document.getElementById('memoIn').value = '';
-    document.getElementById('previewBox').classList.remove('on');
-    pending = null;
+function openSheet(id){document.getElementById(id).classList.add('on');document.body.style.overflow='hidden';}
+function closeSheet(id){
+  document.getElementById(id).classList.remove('on');document.body.style.overflow='';
+  if(id==='addSheet'){
+    document.getElementById('urlIn').value='';
+    document.getElementById('memoIn').value='';
+    document.getElementById('prevBox').classList.remove('on');
+    document.getElementById('ldg').classList.remove('on');
+    pending=null;
   }
 }
-function bgClose(e, id) { if (e.target.id === id) closeSheet(id); }
+function bgClose(e,id){if(e.target.id===id)closeSheet(id);}
 
-function openAdd() {
-  // pre-select current category
+function openAdd(){
   renderCatChips(S.page);
   openSheet('addSheet');
-  setTimeout(() => document.getElementById('urlIn').focus(), 300);
+  setTimeout(()=>document.getElementById('urlIn').focus(),300);
 }
-
-function renderCatChips(activeIdx) {
-  document.getElementById('catChips').innerHTML = S.cats.map((c,i) =>
+function renderCatChips(activeIdx){
+  document.getElementById('catChips').innerHTML=S.cats.map((c,i)=>
     `<button class="chip ${i===activeIdx?'on':''}" data-c="${esc(c)}" onclick="pickChip(this)">${c}</button>`
   ).join('');
 }
-function pickChip(el) {
+function pickChip(el){
   document.querySelectorAll('#catChips .chip').forEach(c=>c.classList.remove('on'));
   el.classList.add('on');
 }
 
 // ── RENDER ────────────────────────────────────────────
-function goPage(i) {
-  S.page = i;
-  setTrack(trackX(), true);
-  renderCatBar();
-}
+function goPage(i){S.page=i;setTx(txBase(),true);renderCatBar();}
 
-function renderCatBar() {
-  document.getElementById('catBar').innerHTML = S.cats.map((c,i) => {
-    const n = S.links.filter(l=>l.cat===c).length;
-    return `<button class="cat-pill ${i===S.page?'active':'inactive'}" onclick="goPage(${i})">
-      ${c}<span class="cat-count">${n||''}</span>
+function renderCatBar(){
+  document.getElementById('catBar').innerHTML=S.cats.map((c,i)=>{
+    const n=S.links.filter(l=>l.cat===c).length;
+    return `<button class="cpill ${i===S.page?'on':'off'}" onclick="goPage(${i})">
+      ${c}${n?`<span class="cpill-n">${n}</span>`:''}
     </button>`;
   }).join('');
-  // scroll active pill into view
-  const pills = document.querySelectorAll('.cat-pill');
-  if (pills[S.page]) pills[S.page].scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
+  const pills=document.querySelectorAll('.cpill');
+  if(pills[S.page]) pills[S.page].scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
 }
 
-function renderPages() {
-  const t = track();
-  // update page count
-  while (t.children.length < S.cats.length) {
-    const p = document.createElement('div');
-    p.className = 'page';
-    t.appendChild(p);
-  }
-  while (t.children.length > S.cats.length) t.removeChild(t.lastChild);
-  t.style.width = (S.cats.length * 100) + '%';
-  Array.from(t.children).forEach(p => { p.style.width = (100/S.cats.length)+'%'; });
-  setTrack(trackX(), false);
+function renderPages(){
+  const t=pt();
+  const needed=S.cats.length;
+  while(t.children.length<needed){const p=document.createElement('div');p.className='page';t.appendChild(p);}
+  while(t.children.length>needed) t.removeChild(t.lastChild);
+  t.style.width=(needed*100)+'%';
+  Array.from(t.children).forEach(p=>{p.style.width=(100/needed)+'%';});
+  setTx(txBase(),false);
   rerenderCards();
 }
 
-function rerenderCards() {
-  const pages = document.querySelectorAll('.page');
-  pages.forEach((page, i) => {
-    const cat = S.cats[i];
-    const links = S.links.filter(l => l.cat === cat);
-    if (selMode) page.classList.add('select-mode');
-    else page.classList.remove('select-mode');
-    if (links.length === 0) {
-      page.innerHTML = `<div class="empty">
+function rerenderCards(){
+  document.querySelectorAll('.page').forEach((page,i)=>{
+    const cat=S.cats[i];
+    const links=S.links.filter(l=>l.cat===cat);
+    if(selMode) page.classList.add('sel-mode'); else page.classList.remove('sel-mode');
+    if(links.length===0){
+      page.innerHTML=`<div class="empty">
         <div class="empty-icon">✦</div>
-        <div class="empty-title">비어있어요</div>
-        <div class="empty-hint">+ 버튼을 눌러<br>첫 링크를 추가해보세요</div>
+        <div class="empty-t">비어있어요</div>
+        <div class="empty-s">+ 버튼을 눌러<br>첫 링크를 추가해보세요</div>
       </div>`;
     } else {
-      page.innerHTML = `<div class="cards">${links.map(l => cardHTML(l)).join('')}</div>`;
+      page.innerHTML=`<div class="cards">${links.map(l=>cardHTML(l)).join('')}</div>`;
     }
   });
 }
 
-function cardHTML(l) {
-  const sel = selIds.has(l.id);
-  const thumbHTML = l.thumb
-    ? `<img class="card-thumb" src="${esc(l.thumb)}" alt="" loading="lazy"
-         onerror="this.outerHTML='<div class=\\'card-thumb-placeholder\\'>${PEMOJI[l.platform]||'⊙'}</div>'">`
-    : `<div class="card-thumb-placeholder">${PEMOJI[l.platform]||'⊙'}</div>`;
-  let host = '';
-  try { host = new URL(l.url).hostname.replace('www.',''); } catch(e) {}
-  const titleShow = l.title || host;
+function cardHTML(l){
+  const sel=selIds.has(l.id);
+  const thumb=l.thumb
+    ?`<img class="card-thumb" src="${esc(l.thumb)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'card-thumb-ph\\'>${PE[l.platform]||'⊙'}</div>'">`
+    :`<div class="card-thumb-ph">${PE[l.platform]||'⊙'}</div>`;
+  let host=''; try{host=new URL(l.url).hostname.replace('www.','');}catch(e){}
+  const title=l.title||host;
+  const safeUrl=esc(l.url);
   return `<div class="card ${sel?'selected':''}" data-id="${l.id}"
-    onclick="onCardTap(event,'${l.id}','${esc(l.url)}')"
-    oncontextmenu="event.preventDefault();if(!selMode)enterSel('${l.id}');else toggleSel('${l.id}')">
-    <div class="card-check">${sel?'✓':''}</div>
+    ontouchstart=""
+    onclick="onCardClick(event,'${l.id}')">
+    <div class="card-chk">${sel?'✓':''}</div>
+    ${!selMode?`<a href="${safeUrl}" target="_blank" rel="noopener" class="card-anchor" onclick="event.stopPropagation()"></a>`:''}
     <div class="card-thumb-wrap">
-      ${thumbHTML}
-      <span class="card-platform p-${l.platform}">${PEMOJI[l.platform]} ${PLABEL[l.platform]}</span>
+      ${thumb}
+      <span class="card-plat pp-${l.platform}">${PE[l.platform]} ${PL[l.platform]}</span>
     </div>
     <div class="card-body">
-      ${titleShow?`<div class="card-title">${esc(titleShow)}</div>`:''}
+      ${title?`<div class="card-title">${esc(title)}</div>`:''}
       ${l.memo?`<div class="card-memo">"${esc(l.memo)}"</div>`:''}
-      <div class="card-footer">
-        <span class="card-date">${l.date}</span>
-        <button class="card-del" onclick="event.stopPropagation();askDeleteSingle('${l.id}')">✕</button>
+      <div class="card-foot">
+        <span class="card-date">${l.date} · ${esc(l.cat)}</span>
+        ${!selMode?`<button class="card-del" onclick="event.stopPropagation();askDelSingle('${l.id}')">✕</button>`:''}
       </div>
     </div>
   </div>`;
 }
 
-function onCardTap(e, id, url) {
-  if (selMode) { toggleSel(id); return; }
-  // let the link work via native tap (not blocked)
+function onCardClick(e,id){
+  if(selMode){e.preventDefault();toggleSel(id);}
 }
 
-function render() {
-  renderCatBar();
-  renderPages();
-}
+function render(){renderCatBar();renderPages();}
 
-// ── HELPERS ───────────────────────────────────────────
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+// ── UTILS ─────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 let toastT;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('on');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => el.classList.remove('on'), 2000);
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2000);
 }
 
 // ── INIT ──────────────────────────────────────────────
 loadS();
-if (S.page >= S.cats.length) S.page = 0;
 render();
 </script>
 </body>
