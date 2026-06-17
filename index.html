@@ -154,6 +154,21 @@ html, body { height: 100%; overflow: hidden; background: var(--black); color: va
 /* TOAST */
 .toast { position:fixed; bottom:calc(var(--safe-bot)+88px); left:50%; transform:translateX(-50%) translateY(16px); background:var(--g2); border:1px solid var(--g3); color:var(--white); padding:10px 20px; border-radius:20px; font-size:13px; font-weight:700; opacity:0; transition:all .22s; pointer-events:none; white-space:nowrap; z-index:999; }
 .toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* SEARCH */
+.search-panel { width:100%; height:100%; background:var(--black); display:flex; flex-direction:column; animation:up .22s ease; }
+.search-top { display:flex; align-items:center; gap:10px; padding: calc(var(--safe-top) + 14px) 16px 12px; flex-shrink:0; }
+.search-input-wrap { flex:1; display:flex; align-items:center; gap:8px; background:var(--g2); border:1.5px solid var(--g3); border-radius:14px; padding:11px 14px; }
+.search-icon { font-size:16px; color:var(--g5); }
+.search-input { flex:1; background:none; border:none; outline:none; color:var(--white); font-size:15px; font-family:inherit; }
+.search-input::placeholder { color:var(--g4); }
+.search-cancel { background:none; border:none; color:var(--accent); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
+.search-cancel:active { opacity:.6; }
+.search-results { flex:1; overflow-y:auto; padding:4px 16px calc(var(--safe-bot) + 40px); -webkit-overflow-scrolling:touch; }
+.search-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:50%; gap:8px; color:var(--g4); text-align:center; }
+.search-empty-icon { font-size:36px; opacity:.3; }
+.search-empty-t { font-size:14px; color:var(--g5); font-weight:600; }
+.search-cat-tag { font-size:10px; font-weight:700; color:var(--black); background:var(--accent); padding:2px 7px; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -161,7 +176,10 @@ html, body { height: 100%; overflow: hidden; background: var(--black); color: va
   <div class="hdr">
     <div class="hdr-row">
       <div class="logo">link<em>.</em></div>
-      <button class="mgr-btn" onclick="openSheet('catSheet')">⊞</button>
+      <div style="display:flex;gap:8px;">
+        <button class="mgr-btn" onclick="openSearch()">⌕</button>
+        <button class="mgr-btn" onclick="openSheet('catSheet')">⊞</button>
+      </div>
     </div>
     <div class="cat-bar" id="catBar"></div>
   </div>
@@ -241,6 +259,20 @@ html, body { height: 100%; overflow: hidden; background: var(--black); color: va
     <p style="font-size:14px;color:#666;margin-bottom:20px;" id="delDesc"></p>
     <button class="btn btn-r" onclick="doDelete()">삭제</button>
     <button class="btn btn-g" onclick="closeSheet('delSheet')">취소</button>
+  </div>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div class="overlay" id="searchOverlay" style="align-items:stretch;" onclick="bgCloseSearch(event)">
+  <div class="search-panel" onclick="event.stopPropagation()">
+    <div class="search-top">
+      <div class="search-input-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="searchIn" type="text" placeholder="제목으로 검색..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <button class="search-cancel" onclick="closeSearch()">취소</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
   </div>
 </div>
 
@@ -582,6 +614,59 @@ function cardHTML(l){
 
 function onCardClick(e,id){
   if(selMode){e.preventDefault();toggleSel(id);}
+}
+
+// ── SEARCH ────────────────────────────────────────────
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('searchResults').innerHTML = '';
+  setTimeout(() => document.getElementById('searchIn').focus(), 200);
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('on');
+  document.body.style.overflow = '';
+  document.getElementById('searchIn').value = '';
+}
+function bgCloseSearch(e) { if (e.target.id === 'searchOverlay') closeSearch(); }
+
+function onSearchInput() {
+  const q = document.getElementById('searchIn').value.trim().toLowerCase();
+  const box = document.getElementById('searchResults');
+  if (!q) { box.innerHTML = ''; return; }
+  const results = S.links.filter(l => (l.title || '').toLowerCase().includes(q));
+  if (results.length === 0) {
+    box.innerHTML = `<div class="search-empty">
+      <div class="search-empty-icon">⌕</div>
+      <div class="search-empty-t">검색 결과가 없어요</div>
+    </div>`;
+    return;
+  }
+  box.innerHTML = `<div class="cards">${results.map(l => searchCardHTML(l)).join('')}</div>`;
+}
+
+function searchCardHTML(l) {
+  const thumb = l.thumb
+    ? `<img class="card-thumb" src="${esc(l.thumb)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'card-thumb-ph\\'>${PE[l.platform]||'⊙'}</div>'">`
+    : `<div class="card-thumb-ph">${PE[l.platform]||'⊙'}</div>`;
+  let host = ''; try { host = new URL(l.url).hostname.replace('www.',''); } catch(e) {}
+  const title = l.title || host;
+  const safeUrl = esc(l.url);
+  return `<div class="card" data-id="${l.id}">
+    <a href="${safeUrl}" target="_blank" rel="noopener" class="card-anchor" onclick="event.stopPropagation()"></a>
+    <div class="card-thumb-wrap">
+      ${thumb}
+      <span class="card-plat pp-${l.platform}">${PE[l.platform]} ${PL[l.platform]}</span>
+      <span class="search-cat-tag" style="position:absolute;top:8px;right:8px;z-index:2;">${esc(l.cat)}</span>
+    </div>
+    <div class="card-body">
+      ${title?`<div class="card-title">${esc(title)}</div>`:''}
+      ${l.memo?`<div class="card-memo">"${esc(l.memo)}"</div>`:''}
+      <div class="card-foot">
+        <span class="card-date">${l.date}</span>
+      </div>
+    </div>
+  </div>`;
 }
 
 function render(){renderCatBar();renderPages();}
